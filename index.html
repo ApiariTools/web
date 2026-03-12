@@ -35,29 +35,77 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    body { background: #0D0B0A; color: #A8B5C4; font-family: Inter, system-ui, sans-serif; }
-    a { color: inherit; }
+    /* ── Base colors (CSS fallbacks — work even without Tailwind CDN) ── */
+    :root {
+      --honey: #F5A623;
+      --amber: #D4881C;
+      --nectar: #FF6B35;
+      --comb: #1A1614;
+      --hive: #0D0B0A;
+      --wax: #2A2420;
+      --smoke: #6B5E54;
+      --frost: #A8B5C4;
+      --mint: #7EC8A0;
+      --royal: #8B7EC8;
+      --slate: #3A3530;
+    }
+    body { background: var(--hive); color: var(--frost); font-family: 'Inter', system-ui, sans-serif; }
+    a { color: inherit; text-decoration: none; }
     h1, h2, h3 { color: #fff; }
-    nav { background: rgba(13, 11, 10, 0.8); border-bottom: 1px solid #3A3530; }
-    section { border-color: #3A3530; }
+
+    /* ── Color utility classes (CSS-only, no Tailwind dependency) ── */
+    .text-honey { color: var(--honey) !important; }
+    .text-amber { color: var(--amber) !important; }
+    .text-nectar { color: var(--nectar) !important; }
+    .text-smoke { color: var(--smoke) !important; }
+    .text-frost { color: var(--frost) !important; }
+    .text-mint { color: var(--mint) !important; }
+    .text-royal { color: var(--royal) !important; }
+    .text-white { color: #fff !important; }
+    .bg-honey { background-color: var(--honey) !important; }
+    .bg-comb { background-color: var(--comb) !important; }
+    .bg-wax { background-color: var(--wax) !important; }
+    .bg-hive { background-color: var(--hive) !important; }
+    .border-slate { border-color: var(--slate) !important; }
+    .border-honey { border-color: var(--honey) !important; }
+
+    /* ── Effects ── */
     .glow { text-shadow: 0 0 40px rgba(245, 166, 35, 0.3); }
     .card-glow { box-shadow: 0 0 0 1px rgba(245, 166, 35, 0.1), 0 4px 24px rgba(0, 0, 0, 0.4); }
     .card-glow:hover { box-shadow: 0 0 0 1px rgba(245, 166, 35, 0.25), 0 8px 40px rgba(0, 0, 0, 0.6); }
-    .gradient-border { background: linear-gradient(135deg, rgba(245, 166, 35, 0.2), rgba(126, 200, 160, 0.1)); }
-    .flow-line { stroke-dasharray: 8 4; animation: dash 20s linear infinite; }
-    @keyframes dash { to { stroke-dashoffset: -200; } }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     .pulse { animation: pulse 2s ease-in-out infinite; }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     .cursor-blink { animation: blink 1s step-end infinite; }
+
+    /* ── TUI mockup boxes ── */
     .tui-box {
-      background: #1A1614;
-      border: 1px solid #3A3530;
+      background: var(--comb);
+      border: 1px solid var(--slate);
       border-radius: 8px;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
       font-size: 13px;
       line-height: 1.5;
     }
+    .tui-box pre {
+      font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      line-height: 1.4;
+      margin: 0;
+      white-space: pre;
+      overflow-x: auto;
+    }
+    .tui-box code, .tui-box span {
+      font-family: inherit;
+    }
+
+    /* ── Nav ── */
+    nav { background: rgba(13, 11, 10, 0.8); border-bottom: 1px solid var(--slate); }
+    section { border-color: var(--slate); }
+    footer { border-color: var(--slate); }
+
+    /* ── Font helpers ── */
+    .font-mono { font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace !important; }
   </style>
 </head>
 <body class="text-frost font-sans antialiased">
