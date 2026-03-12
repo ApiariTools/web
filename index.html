@@ -180,6 +180,13 @@
           <span class="w-3 h-3 rounded-full bg-mint/60"></span>
           <span class="ml-2 text-smoke text-xs">apiari ui</span>
         </div>
+        <!-- KPI strip -->
+        <div class="flex gap-4 text-xs mb-3 pb-2 border-b border-slate">
+          <span><span class="text-white font-semibold">Workers:</span> <span class="text-frost">3</span></span>
+          <span><span class="text-white font-semibold">Signals:</span> <span class="text-frost">2</span></span>
+          <span><span class="text-white font-semibold">PRs:</span> <span class="text-frost">1</span></span>
+          <span class="ml-auto"><span class="text-mint">●</span> <span class="text-mint">up 2h</span></span>
+        </div>
         <div class="grid grid-cols-[140px_1fr] gap-3">
           <!-- Workers panel -->
           <div class="border border-slate rounded p-2">
@@ -203,8 +210,7 @@
             </div>
           </div>
           <!-- Chat panel -->
-          <div class="border border-honey/30 rounded p-2">
-            <div class="text-honey text-xs mb-2">Coordinator Chat</div>
+          <div style="border:1px solid var(--honey); border-radius:4px; padding:8px; opacity:0.9;">
             <div class="space-y-2 text-xs">
               <div>
                 <span class="text-honey font-semibold">You:</span>
