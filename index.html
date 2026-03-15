@@ -94,6 +94,7 @@
     .pulse { animation: pulse 2s ease-in-out infinite; }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     .cursor-blink { animation: blink 1s step-end infinite; }
+    @keyframes tdSlideIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
     /* ── TUI mockup boxes ── */
     .tui-box {
@@ -189,62 +190,8 @@
         </div>
       </div>
 
-      <!-- TUI mockup -->
-      <div class="tui-box p-4 text-[13px] overflow-hidden">
-        <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate">
-          <span class="w-3 h-3 rounded-full bg-nectar/60"></span>
-          <span class="w-3 h-3 rounded-full bg-honey/60"></span>
-          <span class="w-3 h-3 rounded-full bg-mint/60"></span>
-          <span class="ml-2 text-smoke text-xs">apiari ui</span>
-        </div>
-        <!-- KPI strip -->
-        <div class="flex gap-4 text-xs mb-3 pb-2 border-b border-slate">
-          <span><span class="text-white font-semibold">Workers:</span> <span class="text-frost">3</span></span>
-          <span><span class="text-white font-semibold">Signals:</span> <span class="text-frost">2</span></span>
-          <span><span class="text-white font-semibold">PRs:</span> <span class="text-frost">1</span></span>
-          <span class="ml-auto"><span class="text-mint">●</span> <span class="text-mint">up 2h</span></span>
-        </div>
-        <div class="grid grid-cols-[140px_1fr] gap-3">
-          <!-- Workers panel -->
-          <div class="border border-slate rounded p-2">
-            <div class="text-honey text-xs mb-2">Workers (3)</div>
-            <div class="space-y-1">
-              <div class="flex items-center gap-1.5">
-                <span class="text-mint">●</span>
-                <span class="text-white text-xs">hive-1</span>
-                <span class="text-mint text-[10px] ml-auto">running</span>
-              </div>
-              <div class="flex items-center gap-1.5">
-                <span class="text-honey">○</span>
-                <span class="text-white text-xs">hive-2</span>
-                <span class="text-honey text-[10px] ml-auto">waiting</span>
-              </div>
-              <div class="flex items-center gap-1.5">
-                <span class="text-smoke">◆</span>
-                <span class="text-smoke text-xs">cli-1</span>
-                <span class="text-smoke text-[10px] ml-auto">done</span>
-              </div>
-            </div>
-          </div>
-          <!-- Chat panel -->
-          <div style="border:1px solid var(--honey); border-radius:4px; padding:8px; opacity:0.9;">
-            <div class="space-y-2 text-xs">
-              <div>
-                <span class="text-honey font-semibold">You:</span>
-                <span class="text-frost"> check swarm status</span>
-              </div>
-              <div>
-                <span class="text-mint font-semibold">Bee:</span>
-                <span class="text-frost"> 3 workers active. hive-2 opened a PR for the auth feature — looks good, want me to review it?</span>
-              </div>
-              <div class="flex items-center mt-2 border-t border-slate pt-2">
-                <span class="text-smoke">></span>
-                <span class="text-frost ml-1">_</span><span class="cursor-blink text-honey">|</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- TUI mockup (JS-controlled) -->
+      <div id="hero-terminal" class="tui-box p-4 text-[13px] overflow-hidden"></div>
     </div>
   </section>
 
@@ -318,57 +265,7 @@
               </div>
             </div>
           </div>
-          <div class="tui-box p-4 text-[13px] overflow-hidden">
-            <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate">
-              <span class="w-3 h-3 rounded-full" style="background:rgba(255,107,53,0.6)"></span>
-              <span class="w-3 h-3 rounded-full" style="background:rgba(245,166,35,0.6)"></span>
-              <span class="w-3 h-3 rounded-full" style="background:rgba(126,200,160,0.6)"></span>
-              <span class="ml-2 text-smoke text-xs">swarm</span>
-            </div>
-            <div class="grid grid-cols-[130px_1fr] gap-3">
-              <!-- Workers panel -->
-              <div class="border border-slate rounded p-2">
-                <div class="text-honey text-xs mb-2">Workers (3)</div>
-                <div class="space-y-1.5">
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-mint">●</span>
-                    <span class="text-white text-xs">hive-1</span>
-                    <span class="text-mint text-[10px] ml-auto">running</span>
-                  </div>
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-honey">○</span>
-                    <span class="text-white text-xs">hive-2</span>
-                    <span class="text-honey text-[10px] ml-auto">waiting</span>
-                  </div>
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-smoke">◆</span>
-                    <span class="text-smoke text-xs">cli-1</span>
-                    <span class="text-smoke text-[10px] ml-auto">done</span>
-                  </div>
-                </div>
-                <div class="mt-4 pt-2 border-t border-slate text-[10px] text-smoke">n:new  m:merge</div>
-              </div>
-              <!-- Conversation panel -->
-              <div style="border:1px solid var(--honey); border-radius:4px; padding:8px; border-opacity:0.3;">
-                <div class="text-honey text-xs mb-2">hive-1</div>
-                <div class="space-y-2 text-xs">
-                  <div>
-                    <span class="text-mint font-semibold">Bee:</span>
-                    <span class="text-frost"> I'll add the auth middleware now. First, let me check the existing route handlers...</span>
-                  </div>
-                  <div class="space-y-0.5 text-[11px]">
-                    <div><span class="text-smoke">✔</span> <span style="color:var(--slate)">Read src/routes/mod.rs</span></div>
-                    <div><span class="text-smoke">✔</span> <span style="color:var(--slate)">Edit src/middleware.rs</span></div>
-                    <div><span class="text-smoke">⋯</span> <span style="color:var(--slate)">Write src/auth.rs</span></div>
-                  </div>
-                  <div class="flex items-center mt-3 border-t border-slate pt-2">
-                    <span class="text-smoke">></span>
-                    <span class="text-frost ml-1">_</span><span class="cursor-blink text-honey">|</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <div id="swarm-terminal" class="tui-box p-4 text-[13px] overflow-hidden"></div>
         </div>
 
         <!-- Apiari -->
@@ -404,74 +301,7 @@
               </div>
             </div>
           </div>
-          <div class="lg:order-1 tui-box p-4 text-[13px] overflow-hidden">
-            <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate">
-              <span class="w-3 h-3 rounded-full" style="background:rgba(255,107,53,0.6)"></span>
-              <span class="w-3 h-3 rounded-full" style="background:rgba(245,166,35,0.6)"></span>
-              <span class="w-3 h-3 rounded-full" style="background:rgba(126,200,160,0.6)"></span>
-              <span class="ml-2 text-smoke text-xs">apiari ui</span>
-            </div>
-            <!-- KPI strip -->
-            <div class="flex gap-4 text-xs mb-3 pb-2 border-b border-slate">
-              <span><span class="text-white font-semibold">Workers:</span> <span class="text-frost">3</span></span>
-              <span><span class="text-white font-semibold">Signals:</span> <span class="text-frost">2</span></span>
-              <span><span class="text-white font-semibold">PRs:</span> <span class="text-frost">1</span></span>
-              <span class="ml-auto"><span class="text-mint">●</span> <span class="text-mint">up 2h</span></span>
-            </div>
-            <div class="grid grid-cols-[110px_1fr] gap-3 mb-3">
-              <!-- Workers panel -->
-              <div class="border border-slate rounded p-2">
-                <div class="text-honey text-xs mb-2">Workers (3)</div>
-                <div class="space-y-1">
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-mint">●</span>
-                    <span class="text-white text-xs">hive-1</span>
-                  </div>
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-honey">○</span>
-                    <span class="text-white text-xs">hive-2</span>
-                  </div>
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-smoke">◆</span>
-                    <span class="text-smoke text-xs">cli-1</span>
-                  </div>
-                </div>
-              </div>
-              <!-- Signals panel -->
-              <div class="border border-slate rounded p-2">
-                <div class="text-honey text-xs mb-2">Signals (2)</div>
-                <div class="space-y-1.5 text-xs">
-                  <div>
-                    <span class="text-nectar font-semibold">!!</span>
-                    <span class="text-frost"> SSL recv closed</span>
-                    <div class="text-smoke text-[10px] ml-4">sentry · 2h ago</div>
-                  </div>
-                  <div>
-                    <span class="text-nectar font-semibold">!</span>
-                    <span class="text-frost"> Review requested: #42</span>
-                    <div class="text-smoke text-[10px] ml-4">github · 30m ago</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- Chat panel -->
-            <div style="border:1px solid var(--honey); border-radius:4px; padding:8px; opacity:0.9;">
-              <div class="space-y-2 text-xs">
-                <div>
-                  <span class="text-honey font-semibold">You:</span>
-                  <span class="text-frost"> check on the SSL error</span>
-                </div>
-                <div>
-                  <span class="text-mint font-semibold">Bee:</span>
-                  <span class="text-frost"> That Sentry issue resolved itself — it was a transient TLS handshake failure. I'll mark it.</span>
-                </div>
-                <div class="flex items-center mt-2 border-t border-slate pt-2">
-                  <span class="text-smoke">></span>
-                  <span class="text-frost ml-1">_</span><span class="cursor-blink text-honey">|</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <div id="apiari-terminal" class="lg:order-1 tui-box p-4 text-[13px] overflow-hidden"></div>
         </div>
       </div>
     </div>
@@ -769,5 +599,6 @@
     </div>
   </footer>
 
+  <script src="demo.js"></script>
 </body>
 </html>
