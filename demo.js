@@ -540,6 +540,8 @@
     if (heroEl) {
       new TerminalDemo(heroEl, {
         title: 'apiari ui',
+        showKpi: true,
+        kpi: { workers: 2, signals: 2, prs: 1 },
         demoScript: heroDemoScript,
       }).startDemo();
     }
