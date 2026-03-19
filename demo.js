@@ -530,6 +530,537 @@
     await sleep(4000);
   }
 
+  // ─── Animated Architecture Diagrams ────────────────────────────
+
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+
+  function svgEl(tag, attrs) {
+    var e = document.createElementNS(SVG_NS, tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    return e;
+  }
+
+  function svgText(x, y, text, opts) {
+    opts = opts || {};
+    var t = svgEl('text', {
+      x: x, y: y,
+      'text-anchor': opts.anchor || 'middle',
+      fill: opts.fill || COLORS.smoke,
+      'font-size': opts.size || '13',
+      'font-weight': opts.weight || 'normal',
+    });
+    t.textContent = text;
+    return t;
+  }
+
+  function svgRect(x, y, w, h, opts) {
+    opts = opts || {};
+    return svgEl('rect', {
+      x: x, y: y, width: w, height: h,
+      rx: opts.rx || '8',
+      fill: opts.fill || COLORS.comb,
+      stroke: opts.stroke || COLORS.honey,
+      'stroke-width': opts.sw || '1.5',
+    });
+  }
+
+  // Create a line with animated dashes
+  function svgAnimatedLine(x1, y1, x2, y2, opts) {
+    opts = opts || {};
+    var line = svgEl('line', {
+      x1: x1, y1: y1, x2: x2, y2: y2,
+      stroke: opts.stroke || COLORS.slate,
+      'stroke-width': opts.sw || '1.5',
+    });
+    if (opts.animated) {
+      line.setAttribute('class', 'arch-arrow-animated');
+      line.style.animationDirection = opts.reverse ? 'reverse' : 'normal';
+    }
+    if (opts.dashed) {
+      line.setAttribute('stroke-dasharray', '4 4');
+    }
+    return line;
+  }
+
+  // Create a dot that travels along a straight line path
+  function createTravellingDot(svg, x1, y1, x2, y2, opts) {
+    opts = opts || {};
+    var color = opts.color || COLORS.honey;
+    var duration = opts.duration || 2000;
+    var radius = opts.radius || 4;
+
+    var dot = svgEl('circle', {
+      cx: x1, cy: y1, r: radius,
+      fill: color,
+      opacity: '0',
+    });
+    svg.appendChild(dot);
+
+    var startTime = null;
+    var delay = opts.delay || 0;
+
+    function animate(ts) {
+      if (!dot.parentNode) return;
+      if (!startTime) startTime = ts;
+      var elapsed = ts - startTime - delay;
+      if (elapsed < 0) {
+        dot.setAttribute('opacity', '0');
+        requestAnimationFrame(animate);
+        return;
+      }
+      var progress = (elapsed % duration) / duration;
+      // Pause between loops
+      if (progress > 0.7) {
+        dot.setAttribute('opacity', '0');
+      } else {
+        var t = progress / 0.7;
+        dot.setAttribute('cx', x1 + (x2 - x1) * t);
+        dot.setAttribute('cy', y1 + (y2 - y1) * t);
+        var fadeIn = Math.min(t / 0.15, 1);
+        var fadeOut = t > 0.85 ? (1 - t) / 0.15 : 1;
+        dot.setAttribute('opacity', Math.min(fadeIn, fadeOut));
+      }
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+    return dot;
+  }
+
+  // ─── Swarm Diagram ──────────────────────────────────────────────
+
+  function buildSwarmDiagram(container) {
+    container.innerHTML = '';
+    var svg = svgEl('svg', { viewBox: '0 0 880 260', preserveAspectRatio: 'xMidYMid meet' });
+    svg.style.width = '100%';
+    svg.style.height = 'auto';
+    svg.style.minHeight = '200px';
+
+    // Static elements group
+    var staticG = svgEl('g');
+    var animG = svgEl('g'); // animated overlays
+
+    // -- You node --
+    staticG.appendChild(svgRect(20, 90, 110, 70, { stroke: COLORS.honey }));
+    staticG.appendChild(svgText(75, 120, 'You', { fill: COLORS.honey, size: '15', weight: '600' }));
+    staticG.appendChild(svgText(75, 140, 'TUI', { fill: COLORS.smoke, size: '11' }));
+
+    // -- Arrow You → swarm --
+    staticG.appendChild(svgAnimatedLine(130, 125, 200, 125, { animated: true, stroke: COLORS.slate }));
+
+    // -- swarm node --
+    staticG.appendChild(svgRect(200, 70, 140, 110, { stroke: COLORS.honey }));
+    staticG.appendChild(svgText(270, 110, 'swarm', { fill: COLORS.honey, size: '15', weight: '600' }));
+    staticG.appendChild(svgText(270, 132, 'multiplexer', { fill: COLORS.smoke, size: '11' }));
+    staticG.appendChild(svgText(270, 148, '+ TUI', { fill: COLORS.smoke, size: '11' }));
+
+    // -- Worker positions --
+    var workerData = [
+      { id: 'worktree-1', agent: 'claude agent', y: 20, targetY: 55 },
+      { id: 'worktree-2', agent: 'claude agent', y: 95, targetY: 125 },
+      { id: 'worktree-3', agent: 'codex agent', y: 170, targetY: 195 },
+    ];
+
+    // -- spawn arrows swarm → workers --
+    workerData.forEach(function (w) {
+      staticG.appendChild(svgAnimatedLine(340, 125, 400, w.y + 30, { animated: true, stroke: COLORS.slate }));
+    });
+
+    // -- "spawn" label --
+    staticG.appendChild(svgText(370, 120, 'spawn', { fill: COLORS.smoke, size: '10' }));
+
+    // -- GitHub node --
+    staticG.appendChild(svgRect(710, 80, 140, 90, { stroke: COLORS.royal }));
+    staticG.appendChild(svgText(780, 118, 'GitHub', { fill: COLORS.royal, size: '15', weight: '600' }));
+    staticG.appendChild(svgText(780, 140, 'PRs + branches', { fill: COLORS.smoke, size: '11' }));
+
+    // -- "push" label --
+    staticG.appendChild(svgText(660, 120, 'push', { fill: COLORS.smoke, size: '10' }));
+
+    svg.appendChild(staticG);
+
+    // -- Worker nodes (will be animated) --
+    var workerEls = [];
+    workerData.forEach(function (w, i) {
+      var g = svgEl('g');
+      g.style.opacity = '0';
+      g.appendChild(svgRect(400, w.y, 190, 55, { rx: '6', stroke: COLORS.mint, sw: '1.5' }));
+      g.appendChild(svgText(495, w.y + 22, w.id, { fill: COLORS.mint, size: '13', weight: '500' }));
+      g.appendChild(svgText(495, w.y + 40, w.agent, { fill: COLORS.smoke, size: '11' }));
+
+      // Pulse ring (hidden initially)
+      var pulse = svgEl('rect', {
+        x: 397, y: w.y - 3, width: 196, height: 61, rx: '8',
+        fill: 'none', stroke: COLORS.mint, 'stroke-width': '1', opacity: '0',
+      });
+      g.appendChild(pulse);
+
+      // Push arrow to GitHub
+      var pushLine = svgAnimatedLine(590, w.y + 28, 710, 125, { animated: true, stroke: COLORS.slate });
+      pushLine.style.opacity = '0';
+      g.appendChild(pushLine);
+
+      // Done checkmark (hidden)
+      var check = svgText(590, w.y + 8, '\u2714', { fill: COLORS.mint, size: '14' });
+      check.style.opacity = '0';
+      g.appendChild(check);
+
+      svg.appendChild(g);
+      workerEls.push({ g: g, pulse: pulse, pushLine: pushLine, check: check, data: w });
+    });
+
+    svg.appendChild(animG);
+    container.appendChild(svg);
+
+    // -- Animation state --
+    var state = { running: true, paused: false, animFrame: null };
+
+    async function runLoop() {
+      while (state.running) {
+        // Reset all workers
+        workerEls.forEach(function (w) {
+          w.g.style.opacity = '0';
+          w.pulse.setAttribute('opacity', '0');
+          w.pushLine.style.opacity = '0';
+          w.check.style.opacity = '0';
+        });
+        // Remove old travelling dots
+        animG.innerHTML = '';
+
+        await sleep(600);
+        if (!state.running) return;
+
+        // Spawn workers one by one
+        for (var i = 0; i < workerEls.length; i++) {
+          if (!state.running) return;
+          while (state.paused) { await sleep(100); if (!state.running) return; }
+
+          var w = workerEls[i];
+          w.g.style.opacity = '1';
+          w.g.style.animation = 'nodeSpawn 0.5s ease-out';
+
+          // Start pulsing
+          w.pulse.setAttribute('opacity', '0.3');
+          w.pulse.style.animation = 'pulse 2s ease-in-out infinite';
+
+          await sleep(800);
+        }
+
+        if (!state.running) return;
+
+        // Workers are "running" for a bit
+        await sleep(2000);
+        if (!state.running) return;
+
+        // Workers push to GitHub one by one
+        for (var j = 0; j < workerEls.length; j++) {
+          if (!state.running) return;
+          while (state.paused) { await sleep(100); if (!state.running) return; }
+
+          var we = workerEls[j];
+          we.pushLine.style.opacity = '1';
+
+          // Travelling dot along push line
+          var wd = we.data;
+          createTravellingDot(animG, 590, wd.y + 28, 710, 125, {
+            color: COLORS.mint, duration: 1500, radius: 3, delay: 0,
+          });
+
+          await sleep(600);
+        }
+
+        await sleep(2000);
+        if (!state.running) return;
+
+        // Workers complete one by one
+        for (var k = 0; k < workerEls.length; k++) {
+          if (!state.running) return;
+          while (state.paused) { await sleep(100); if (!state.running) return; }
+
+          var wk = workerEls[k];
+          wk.pulse.style.animation = 'none';
+          wk.pulse.setAttribute('opacity', '0');
+          wk.check.style.opacity = '1';
+          wk.check.style.animation = 'checkPop 0.4s ease-out';
+          // Fade the worker a bit to show "done"
+          wk.g.style.opacity = '0.5';
+
+          await sleep(500);
+        }
+
+        await sleep(3000);
+        if (!state.running) return;
+      }
+    }
+
+    runLoop();
+    return state;
+  }
+
+  // ─── Apiari Diagram ─────────────────────────────────────────────
+
+  function buildApiariDiagram(container) {
+    container.innerHTML = '';
+    var svg = svgEl('svg', { viewBox: '0 0 960 420', preserveAspectRatio: 'xMidYMid meet' });
+    svg.style.width = '100%';
+    svg.style.height = 'auto';
+    svg.style.minHeight = '280px';
+
+    var staticG = svgEl('g');
+    var animG = svgEl('g');
+
+    // -- You node --
+    staticG.appendChild(svgRect(15, 130, 110, 80, { stroke: COLORS.honey }));
+    staticG.appendChild(svgText(70, 163, 'You', { fill: COLORS.honey, size: '15', weight: '600' }));
+    staticG.appendChild(svgText(70, 185, 'Telegram / TUI', { fill: COLORS.smoke, size: '10' }));
+
+    // -- Arrow You ↔ daemon --
+    staticG.appendChild(svgAnimatedLine(125, 170, 200, 170, { animated: true, stroke: COLORS.slate }));
+    staticG.appendChild(svgText(162, 160, 'chat', { fill: COLORS.smoke, size: '10' }));
+
+    // -- Apiari daemon node --
+    staticG.appendChild(svgRect(200, 100, 180, 155, { stroke: COLORS.honey }));
+    staticG.appendChild(svgText(290, 130, 'apiari daemon', { fill: COLORS.honey, size: '14', weight: '600' }));
+
+    // Coordinator sub-label (will glow)
+    var coordText = svgText(290, 155, 'coordinator', { fill: COLORS.mint, size: '12' });
+    staticG.appendChild(coordText);
+
+    staticG.appendChild(svgText(290, 175, 'signal watchers', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgText(290, 192, 'swarm watcher', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgText(290, 209, 'auto-triage', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgText(290, 226, 'telegram bot', { fill: COLORS.smoke, size: '10' }));
+
+    // Spinner circle for "thinking" (hidden initially)
+    var spinner = svgEl('circle', {
+      cx: '240', cy: '150', r: '8',
+      fill: 'none', stroke: COLORS.honey, 'stroke-width': '2',
+      'stroke-dasharray': '15 35', opacity: '0',
+    });
+    spinner.style.transformOrigin = '240px 150px';
+    staticG.appendChild(spinner);
+
+    // -- Arrow daemon → swarm ("dispatch") --
+    staticG.appendChild(svgAnimatedLine(380, 150, 465, 110, { animated: true, stroke: COLORS.slate }));
+    staticG.appendChild(svgText(422, 122, 'dispatch', { fill: COLORS.smoke, size: '10' }));
+
+    // -- Arrow daemon ↔ signals ("poll") --
+    staticG.appendChild(svgAnimatedLine(380, 210, 465, 310, { animated: true, stroke: COLORS.slate, reverse: true }));
+    staticG.appendChild(svgText(410, 268, 'poll', { fill: COLORS.smoke, size: '10' }));
+
+    // -- Swarm node --
+    staticG.appendChild(svgRect(465, 55, 145, 110, { stroke: COLORS.honey, sw: '1' }));
+    staticG.appendChild(svgText(537, 92, 'swarm', { fill: COLORS.honey, size: '14', weight: '600' }));
+    staticG.appendChild(svgText(537, 112, 'agents + worktrees', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgText(537, 128, 'state.json', { fill: COLORS.smoke, size: '10' }));
+
+    // -- Notify arrow swarm → daemon --
+    var notifyLine = svgAnimatedLine(465, 140, 380, 160, { animated: true, stroke: COLORS.mint, reverse: true });
+    notifyLine.setAttribute('stroke-dasharray', '4 4');
+    staticG.appendChild(notifyLine);
+    staticG.appendChild(svgText(422, 158, 'notify', { fill: COLORS.mint, size: '9' }));
+
+    // -- Signals node --
+    staticG.appendChild(svgRect(465, 290, 145, 95, { stroke: COLORS.nectar, sw: '1' }));
+    staticG.appendChild(svgText(537, 322, 'signals', { fill: COLORS.nectar, size: '14', weight: '600' }));
+    staticG.appendChild(svgText(537, 342, 'Sentry errors', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgText(537, 358, 'GitHub events', { fill: COLORS.smoke, size: '10' }));
+
+    // -- GitHub node --
+    staticG.appendChild(svgRect(790, 85, 140, 80, { stroke: COLORS.royal }));
+    staticG.appendChild(svgText(860, 118, 'GitHub', { fill: COLORS.royal, size: '15', weight: '600' }));
+    staticG.appendChild(svgText(860, 138, 'PRs + issues', { fill: COLORS.smoke, size: '11' }));
+
+    // -- Webhooks path: GitHub → signals --
+    var whPath = svgEl('path', {
+      d: 'M 860 165 L 860 340 L 610 340',
+      fill: 'none', stroke: COLORS.slate, 'stroke-width': '1',
+      'stroke-dasharray': '4 4',
+    });
+    staticG.appendChild(whPath);
+    staticG.appendChild(svgText(740, 358, 'webhooks', { fill: COLORS.smoke, size: '10' }));
+
+    // -- Agent positions --
+    var agentData = [
+      { id: 'agent-1', y: 30 },
+      { id: 'agent-2', y: 105 },
+      { id: 'agent-3', y: 180 },
+    ];
+
+    // -- spawn arrows swarm → agents --
+    agentData.forEach(function (a) {
+      staticG.appendChild(svgAnimatedLine(610, 110, 660, a.y + 22, { animated: true, stroke: COLORS.slate, sw: '1' }));
+    });
+
+    // -- push arrows agents → GitHub --
+    agentData.forEach(function (a) {
+      staticG.appendChild(svgAnimatedLine(760, a.y + 22, 790, 125, { animated: true, stroke: COLORS.slate, sw: '1' }));
+    });
+
+    svg.appendChild(staticG);
+
+    // -- Agent nodes (animated) --
+    var agentEls = [];
+    agentData.forEach(function (a) {
+      var g = svgEl('g');
+      g.style.opacity = '0';
+      g.appendChild(svgRect(660, a.y, 100, 44, { rx: '4', stroke: COLORS.mint, sw: '1' }));
+      g.appendChild(svgText(710, a.y + 27, a.id, { fill: COLORS.mint, size: '11' }));
+
+      // Pulse indicator
+      var pulse = svgEl('circle', {
+        cx: 670, cy: a.y + 8, r: '3',
+        fill: COLORS.mint, opacity: '0',
+      });
+      g.appendChild(pulse);
+
+      svg.appendChild(g);
+      agentEls.push({ g: g, pulse: pulse, data: a });
+    });
+
+    // -- PR checkmark on GitHub (hidden) --
+    var prCheck = svgText(930, 105, '\u2714 PR', { fill: COLORS.mint, size: '12', weight: '600' });
+    prCheck.style.opacity = '0';
+    svg.appendChild(prCheck);
+
+    // -- Telegram notification bubble (hidden) --
+    var telegramBubble = svgEl('g');
+    telegramBubble.style.opacity = '0';
+    var bubbleRect = svgRect(15, 85, 110, 30, { rx: '12', stroke: COLORS.honey, fill: COLORS.wax, sw: '1' });
+    telegramBubble.appendChild(bubbleRect);
+    telegramBubble.appendChild(svgText(70, 105, 'PR opened!', { fill: COLORS.honey, size: '10', weight: '500' }));
+    svg.appendChild(telegramBubble);
+
+    svg.appendChild(animG);
+    container.appendChild(svg);
+
+    // -- Animation state --
+    var state = { running: true, paused: false };
+
+    async function runLoop() {
+      while (state.running) {
+        // Reset
+        agentEls.forEach(function (a) {
+          a.g.style.opacity = '0';
+          a.pulse.setAttribute('opacity', '0');
+          a.pulse.style.animation = '';
+        });
+        prCheck.style.opacity = '0';
+        telegramBubble.style.opacity = '0';
+        spinner.setAttribute('opacity', '0');
+        spinner.style.animation = '';
+        coordText.style.animation = '';
+        animG.innerHTML = '';
+
+        await sleep(600);
+        if (!state.running) return;
+
+        // Step 1: GitHub signal comes in (orange dot → daemon)
+        while (state.paused) { await sleep(100); if (!state.running) return; }
+        createTravellingDot(animG, 860, 165, 537, 340, {
+          color: COLORS.honey, duration: 1800, radius: 4, delay: 0,
+        });
+
+        await sleep(1000);
+        if (!state.running) return;
+
+        // Step 2: Sentry error arrives (red dot → signals → daemon)
+        while (state.paused) { await sleep(100); if (!state.running) return; }
+        createTravellingDot(animG, 537, 290, 380, 210, {
+          color: COLORS.nectar, duration: 1500, radius: 5, delay: 0,
+        });
+
+        await sleep(1500);
+        if (!state.running) return;
+
+        // Step 3: Coordinator "thinking" — spinner + glow
+        while (state.paused) { await sleep(100); if (!state.running) return; }
+        spinner.setAttribute('opacity', '1');
+        spinner.style.animation = 'spin 1s linear infinite';
+        coordText.style.animation = 'nodeGlow 1.5s ease-in-out infinite';
+
+        await sleep(2000);
+        if (!state.running) return;
+
+        spinner.setAttribute('opacity', '0');
+        spinner.style.animation = '';
+
+        // Step 4: Workers dispatched one by one
+        for (var i = 0; i < agentEls.length; i++) {
+          if (!state.running) return;
+          while (state.paused) { await sleep(100); if (!state.running) return; }
+
+          var agent = agentEls[i];
+          agent.g.style.opacity = '1';
+          agent.g.style.animation = 'nodeSpawn 0.5s ease-out';
+          agent.pulse.setAttribute('opacity', '1');
+          agent.pulse.style.animation = 'pulse 1.5s ease-in-out infinite';
+
+          // Dispatch dot daemon → swarm → agent
+          createTravellingDot(animG, 380, 150, 660, agent.data.y + 22, {
+            color: COLORS.honey, duration: 1200, radius: 3,
+          });
+
+          await sleep(600);
+        }
+
+        await sleep(2000);
+        if (!state.running) return;
+
+        // Step 5: Agents push to GitHub (green dots)
+        while (state.paused) { await sleep(100); if (!state.running) return; }
+        agentEls.forEach(function (a, idx) {
+          createTravellingDot(animG, 760, a.data.y + 22, 790, 125, {
+            color: COLORS.mint, duration: 1200, radius: 3, delay: idx * 300,
+          });
+        });
+
+        await sleep(2000);
+        if (!state.running) return;
+
+        // Step 6: PR checkmark appears on GitHub
+        while (state.paused) { await sleep(100); if (!state.running) return; }
+        prCheck.style.opacity = '1';
+        prCheck.style.animation = 'checkPop 0.4s ease-out';
+
+        await sleep(1000);
+        if (!state.running) return;
+
+        // Step 7: Telegram notification to You
+        while (state.paused) { await sleep(100); if (!state.running) return; }
+        // Notification dot daemon → You
+        createTravellingDot(animG, 200, 170, 125, 170, {
+          color: COLORS.honey, duration: 800, radius: 3,
+        });
+
+        await sleep(600);
+        if (!state.running) return;
+
+        telegramBubble.style.opacity = '1';
+        telegramBubble.style.animation = 'bubbleSlide 0.4s ease-out';
+
+        await sleep(1000);
+        if (!state.running) return;
+
+        // Stop coordinator glow
+        coordText.style.animation = '';
+
+        // Workers fade to done
+        agentEls.forEach(function (a) {
+          a.pulse.style.animation = 'none';
+          a.pulse.setAttribute('opacity', '0');
+          a.g.style.opacity = '0.5';
+        });
+
+        await sleep(4000);
+        if (!state.running) return;
+      }
+    }
+
+    runLoop();
+    return state;
+  }
+
   // ─── Init ───────────────────────────────────────────────────────
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -561,6 +1092,32 @@
         kpi: { workers: 3, signals: 2, prs: 1 },
         demoScript: apiariDemoScript,
       }).startDemo();
+    }
+
+    // ── Architecture diagrams ──
+    var swarmDiagramEl = document.getElementById('swarm-diagram');
+    var apiariDiagramEl = document.getElementById('apiari-diagram');
+
+    if (swarmDiagramEl) {
+      var swarmState = buildSwarmDiagram(swarmDiagramEl);
+      var swarmBtn = document.getElementById('swarm-diagram-toggle');
+      if (swarmBtn) {
+        swarmBtn.addEventListener('click', function () {
+          swarmState.paused = !swarmState.paused;
+          swarmBtn.innerHTML = swarmState.paused ? '&#9654; Play' : '&#9654; Pause';
+        });
+      }
+    }
+
+    if (apiariDiagramEl) {
+      var apiariState = buildApiariDiagram(apiariDiagramEl);
+      var apiariBtn = document.getElementById('apiari-diagram-toggle');
+      if (apiariBtn) {
+        apiariBtn.addEventListener('click', function () {
+          apiariState.paused = !apiariState.paused;
+          apiariBtn.innerHTML = apiariState.paused ? '&#9654; Play' : '&#9654; Pause';
+        });
+      }
     }
   });
 
