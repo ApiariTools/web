@@ -467,12 +467,20 @@
           <p class="text-smoke text-sm mb-4">Run agents in parallel on any project. No config needed.</p>
           <!-- Platform tabs -->
           <div class="flex gap-1 mb-3" data-tabs="swarm-install">
-            <button class="px-3 py-1 text-xs rounded font-mono transition tab-active" data-tab="macos">macOS</button>
+            <button class="px-3 py-1 text-xs rounded font-mono transition tab-active" data-tab="binstall">cargo binstall</button>
+            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="macos">macOS</button>
             <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="linux">Linux</button>
-            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="cargo">cargo</button>
           </div>
           <div data-tab-content="swarm-install">
-            <div class="tui-box p-4 text-[12px] space-y-1" data-panel="macos">
+            <div class="tui-box p-4 text-[12px] space-y-1" data-panel="binstall">
+              <div><span class="text-smoke">$</span> <span class="text-frost">cargo binstall swarm</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">swarm</span></div>
+              <div class="text-smoke"># Press n to create a worker, type your task, go.</div>
+              <div class="text-smoke mt-1"># cargo binstall downloads pre-built binaries.</div>
+              <div class="text-smoke"># Install it first: cargo install cargo-binstall</div>
+            </div>
+            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="macos">
               <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/swarm/releases/latest/download/swarm-aarch64-apple-darwin -o ~/.local/bin/swarm && chmod +x ~/.local/bin/swarm</span></div>
               <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
               <div><span class="text-smoke">$</span> <span class="text-frost">swarm</span></div>
@@ -480,12 +488,6 @@
             </div>
             <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="linux">
               <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/swarm/releases/latest/download/swarm-x86_64-unknown-linux-gnu -o ~/.local/bin/swarm && chmod +x ~/.local/bin/swarm</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">swarm</span></div>
-              <div class="text-smoke"># Press n to create a worker, type your task, go.</div>
-            </div>
-            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="cargo">
-              <div><span class="text-smoke">$</span> <span class="text-frost">cargo install --git https://github.com/ApiariTools/swarm</span></div>
               <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
               <div><span class="text-smoke">$</span> <span class="text-frost">swarm</span></div>
               <div class="text-smoke"># Press n to create a worker, type your task, go.</div>
@@ -499,12 +501,20 @@
           <p class="text-smoke text-sm mb-4">Add the coordinator, signals, and Telegram notifications.</p>
           <!-- Platform tabs -->
           <div class="flex gap-1 mb-3" data-tabs="apiari-install">
-            <button class="px-3 py-1 text-xs rounded font-mono transition tab-active" data-tab="macos">macOS</button>
+            <button class="px-3 py-1 text-xs rounded font-mono transition tab-active" data-tab="binstall">cargo binstall</button>
+            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="macos">macOS</button>
             <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="linux">Linux</button>
-            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="cargo">cargo</button>
           </div>
           <div data-tab-content="apiari-install">
-            <div class="tui-box p-4 text-[12px] space-y-1" data-panel="macos">
+            <div class="tui-box p-4 text-[12px] space-y-1" data-panel="binstall">
+              <div><span class="text-smoke">$</span> <span class="text-frost">cargo binstall apiari</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">apiari</span></div>
+              <div class="text-smoke"># TUI opens automatically. Onboarding handles setup.</div>
+              <div class="text-smoke mt-1"># cargo binstall downloads pre-built binaries.</div>
+              <div class="text-smoke"># Install it first: cargo install cargo-binstall</div>
+            </div>
+            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="macos">
               <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/apiari/releases/latest/download/apiari-aarch64-apple-darwin -o ~/.local/bin/apiari && chmod +x ~/.local/bin/apiari</span></div>
               <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
               <div><span class="text-smoke">$</span> <span class="text-frost">apiari</span></div>
@@ -512,12 +522,6 @@
             </div>
             <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="linux">
               <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/apiari/releases/latest/download/apiari-x86_64-unknown-linux-gnu -o ~/.local/bin/apiari && chmod +x ~/.local/bin/apiari</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">apiari</span></div>
-              <div class="text-smoke"># TUI opens automatically. Onboarding handles setup.</div>
-            </div>
-            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="cargo">
-              <div><span class="text-smoke">$</span> <span class="text-frost">cargo install --git https://github.com/ApiariTools/apiari</span></div>
               <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
               <div><span class="text-smoke">$</span> <span class="text-frost">apiari</span></div>
               <div class="text-smoke"># TUI opens automatically. Onboarding handles setup.</div>
