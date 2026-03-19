@@ -189,6 +189,11 @@
     .arch-check-pop { animation: checkPop 0.4s ease-out forwards; }
     .arch-bubble-slide { animation: bubbleSlide 0.4s ease-out forwards; }
     .arch-worker-done { animation: workerDone 0.5s ease-out forwards; }
+
+    /* ── Install tab switcher ── */
+    [data-tabs] button { background: var(--wax); color: var(--smoke); }
+    [data-tabs] button:hover { color: var(--frost); }
+    [data-tabs] button.tab-active { background: var(--honey); color: var(--hive); }
   </style>
 </head>
 <body class="text-frost font-sans antialiased">
@@ -460,11 +465,31 @@
         <div class="p-6 bg-comb rounded-xl card-glow">
           <h3 class="text-honey font-mono font-bold mb-4">Just swarm (simplest)</h3>
           <p class="text-smoke text-sm mb-4">Run agents in parallel on any project. No config needed.</p>
-          <div class="tui-box p-4 text-[12px] space-y-1">
-            <div><span class="text-smoke">$</span> <span class="text-frost">cargo install --git https://github.com/ApiariTools/swarm</span></div>
-            <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
-            <div><span class="text-smoke">$</span> <span class="text-frost">swarm</span></div>
-            <div class="text-smoke"># Press n to create a worker, type your task, go.</div>
+          <!-- Platform tabs -->
+          <div class="flex gap-1 mb-3" data-tabs="swarm-install">
+            <button class="px-3 py-1 text-xs rounded font-mono transition tab-active" data-tab="macos">macOS</button>
+            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="linux">Linux</button>
+            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="cargo">cargo</button>
+          </div>
+          <div data-tab-content="swarm-install">
+            <div class="tui-box p-4 text-[12px] space-y-1" data-panel="macos">
+              <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/swarm/releases/latest/download/swarm-aarch64-apple-darwin -o ~/.local/bin/swarm && chmod +x ~/.local/bin/swarm</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">swarm</span></div>
+              <div class="text-smoke"># Press n to create a worker, type your task, go.</div>
+            </div>
+            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="linux">
+              <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/swarm/releases/latest/download/swarm-x86_64-unknown-linux-gnu -o ~/.local/bin/swarm && chmod +x ~/.local/bin/swarm</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">swarm</span></div>
+              <div class="text-smoke"># Press n to create a worker, type your task, go.</div>
+            </div>
+            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="cargo">
+              <div><span class="text-smoke">$</span> <span class="text-frost">cargo install --git https://github.com/ApiariTools/swarm</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">swarm</span></div>
+              <div class="text-smoke"># Press n to create a worker, type your task, go.</div>
+            </div>
           </div>
         </div>
 
@@ -472,11 +497,31 @@
         <div class="p-6 bg-comb rounded-xl card-glow">
           <h3 class="text-honey font-mono font-bold mb-4">Full orchestration</h3>
           <p class="text-smoke text-sm mb-4">Add the coordinator, signals, and Telegram notifications.</p>
-          <div class="tui-box p-4 text-[12px] space-y-1">
-            <div><span class="text-smoke">$</span> <span class="text-frost">cargo install apiari</span></div>
-            <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
-            <div><span class="text-smoke">$</span> <span class="text-frost">apiari</span></div>
-            <div class="text-smoke"># TUI opens automatically. Onboarding handles setup.</div>
+          <!-- Platform tabs -->
+          <div class="flex gap-1 mb-3" data-tabs="apiari-install">
+            <button class="px-3 py-1 text-xs rounded font-mono transition tab-active" data-tab="macos">macOS</button>
+            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="linux">Linux</button>
+            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="cargo">cargo</button>
+          </div>
+          <div data-tab-content="apiari-install">
+            <div class="tui-box p-4 text-[12px] space-y-1" data-panel="macos">
+              <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/apiari/releases/latest/download/apiari-aarch64-apple-darwin -o ~/.local/bin/apiari && chmod +x ~/.local/bin/apiari</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">apiari</span></div>
+              <div class="text-smoke"># TUI opens automatically. Onboarding handles setup.</div>
+            </div>
+            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="linux">
+              <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/apiari/releases/latest/download/apiari-x86_64-unknown-linux-gnu -o ~/.local/bin/apiari && chmod +x ~/.local/bin/apiari</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">apiari</span></div>
+              <div class="text-smoke"># TUI opens automatically. Onboarding handles setup.</div>
+            </div>
+            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="cargo">
+              <div><span class="text-smoke">$</span> <span class="text-frost">cargo install --git https://github.com/ApiariTools/apiari</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">apiari</span></div>
+              <div class="text-smoke"># TUI opens automatically. Onboarding handles setup.</div>
+            </div>
           </div>
         </div>
       </div>
@@ -489,8 +534,8 @@
       <h2 class="text-3xl font-bold text-white mb-8">Requirements</h2>
       <div class="grid md:grid-cols-3 lg:grid-cols-5 gap-6">
         <div class="p-4 bg-comb rounded-lg">
-          <div class="text-honey font-mono font-bold mb-2">Rust 1.93+</div>
-          <p class="text-smoke text-sm">Edition 2024. Install via rustup.</p>
+          <div class="text-honey font-mono font-bold mb-2">~/.local/bin</div>
+          <p class="text-smoke text-sm">Pre-built binaries. Or build from source with Rust 1.93+.</p>
         </div>
         <div class="p-4 bg-comb rounded-lg">
           <div class="text-honey font-mono font-bold mb-2">claude CLI</div>
@@ -534,5 +579,22 @@
   </footer>
 
   <script src="demo.js"></script>
+  <script>
+    // Tab switcher for install instructions
+    document.querySelectorAll('[data-tabs]').forEach(function(tabBar) {
+      var group = tabBar.getAttribute('data-tabs');
+      var content = document.querySelector('[data-tab-content="' + group + '"]');
+      tabBar.querySelectorAll('button').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          tabBar.querySelectorAll('button').forEach(function(b) { b.classList.remove('tab-active'); });
+          btn.classList.add('tab-active');
+          var tab = btn.getAttribute('data-tab');
+          content.querySelectorAll('[data-panel]').forEach(function(p) {
+            p.classList.toggle('hidden', p.getAttribute('data-panel') !== tab);
+          });
+        });
+      });
+    });
+  </script>
 </body>
 </html>
