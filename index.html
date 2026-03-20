@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apiari — AI Agent Orchestration</title>
-  <meta name="description" content="Run AI coding agents in parallel. Orchestrate, monitor, and coordinate autonomous development workflows from your terminal.">
+  <title>Apiari — Your AI agents, coordinated</title>
+  <meta name="description" content="Run AI coding agents in parallel. Bee handles the rest. No config files required.">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png">
@@ -13,14 +13,14 @@
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://apiari.run/">
-  <meta property="og:title" content="Apiari — AI Agent Orchestration">
-  <meta property="og:description" content="Run AI coding agents in parallel. Orchestrate, monitor, and coordinate autonomous development workflows from your terminal.">
+  <meta property="og:title" content="Apiari — Your AI agents, coordinated">
+  <meta property="og:description" content="Run AI coding agents in parallel. Bee handles the rest. No config files required.">
   <meta property="og:site_name" content="Apiari">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Apiari — AI Agent Orchestration">
-  <meta name="twitter:description" content="Run AI coding agents in parallel. Orchestrate, monitor, and coordinate autonomous development workflows from your terminal.">
+  <meta name="twitter:title" content="Apiari — Your AI agents, coordinated">
+  <meta name="twitter:description" content="Run AI coding agents in parallel. Bee handles the rest. No config files required.">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -194,6 +194,57 @@
     [data-tabs] button { background: var(--wax); color: var(--smoke); }
     [data-tabs] button:hover { color: var(--frost); }
     [data-tabs] button.tab-active { background: var(--honey); color: var(--hive); }
+
+    /* ── Collapsible section ── */
+    .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+    .collapsible-content.open { max-height: 4000px; }
+    .collapsible-toggle svg { transition: transform 0.3s ease; }
+    .collapsible-toggle.open svg { transform: rotate(180deg); }
+
+    /* ── Comic strip step cards ── */
+    .step-card { position: relative; }
+    .step-card .step-icon {
+      width: 56px; height: 56px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      background: var(--wax);
+      border: 2px solid var(--honey);
+      font-size: 24px;
+      margin: 0 auto 12px;
+    }
+    .step-connector {
+      display: none;
+    }
+    @media (min-width: 768px) {
+      .step-connector {
+        display: block;
+        position: absolute;
+        top: 28px;
+        right: -24px;
+        color: var(--honey);
+        font-size: 20px;
+        font-weight: bold;
+      }
+    }
+
+    /* ── Integration icons ── */
+    .integration-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 12px;
+      border-radius: 12px;
+      background: var(--comb);
+      border: 1px solid var(--slate);
+      transition: border-color 0.3s;
+    }
+    .integration-item:hover { border-color: var(--honey); }
+    .integration-icon {
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+    }
   </style>
 </head>
 <body class="text-frost font-sans antialiased">
@@ -207,8 +258,8 @@
       <!-- Desktop nav -->
       <div class="hidden sm:flex items-center gap-6 text-sm">
         <a href="#how-it-works" class="text-smoke hover:text-frost transition">How it works</a>
+        <a href="#get-started" class="text-smoke hover:text-frost transition">Get started</a>
         <a href="#tools" class="text-smoke hover:text-frost transition">Tools</a>
-        <a href="#architecture" class="text-smoke hover:text-frost transition">Architecture</a>
         <a href="https://github.com/ApiariTools" class="inline-flex items-center gap-2 px-4 py-2 bg-wax hover:bg-slate rounded-lg text-frost transition">
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
           GitHub
@@ -228,29 +279,23 @@
       <div>
         <div class="inline-flex items-center gap-2 px-3 py-1 bg-wax rounded-full text-xs text-honey mb-6">
           <span class="w-1.5 h-1.5 bg-honey rounded-full pulse"></span>
-          All Rust. All terminal. Zero cloud dependencies.
+          Works out of the box with Claude + gh CLI
         </div>
         <h1 class="text-5xl lg:text-6xl font-bold text-white leading-tight glow">
-          Run AI agents<br>
-          <span class="text-honey">in parallel.</span>
+          Your AI agents,<br>
+          <span class="text-honey">coordinated.</span>
         </h1>
         <p class="mt-6 text-lg text-smoke leading-relaxed max-w-lg">
-          Apiari is a toolchain for orchestrating autonomous AI coding agents.
-          Each agent works in an isolated git worktree — committing code, opening PRs, and resolving issues —
-          while you coordinate from your terminal or phone.
+          Install apiari. Run it. Bee introduces herself, sets up your workspace, and starts coordinating your AI agents. No config files required.
         </p>
-        <div class="mt-5 flex flex-col gap-3 text-sm max-w-md">
-          <div class="flex items-start gap-2">
-            <span class="text-honey font-mono font-bold shrink-0">swarm</span>
-            <span class="text-smoke">— the engine. Runs agents in parallel across isolated git worktrees. Use it standalone.</span>
-          </div>
-          <div class="flex items-start gap-2">
-            <span class="text-honey font-mono font-bold shrink-0">apiari</span>
-            <span class="text-smoke">— built on swarm. Adds an AI coordinator, signal monitoring, Telegram bot, and a dashboard to manage it all.</span>
+        <div class="mt-8 tui-box p-4 max-w-sm">
+          <div class="text-[13px] space-y-1">
+            <div><span class="text-smoke">$</span> <span class="text-frost">cargo binstall apiari</span></div>
+            <div><span class="text-smoke">$</span> <span class="text-frost">apiari</span></div>
           </div>
         </div>
-        <div class="mt-8 flex flex-wrap gap-4">
-          <a href="https://github.com/ApiariTools" class="inline-flex items-center gap-2 px-6 py-3 bg-honey font-semibold rounded-lg hover:bg-amber transition" style="color:#0D0B0A !important;">
+        <div class="mt-6 flex flex-wrap gap-4">
+          <a href="#get-started" class="inline-flex items-center gap-2 px-6 py-3 bg-honey font-semibold rounded-lg hover:bg-amber transition" style="color:#0D0B0A !important;">
             Get started
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
           </a>
@@ -265,32 +310,66 @@
     </div>
   </section>
 
-  <!-- Problem -->
-  <section class="py-24 border-t border-slate">
+  <!-- Works with -->
+  <section class="py-16 border-t border-slate">
     <div class="max-w-6xl mx-auto px-6">
-      <div class="max-w-2xl">
-        <h2 class="text-3xl font-bold text-white">The problem</h2>
-        <p class="mt-4 text-smoke text-lg leading-relaxed">
-          AI coding agents are powerful — but running one at a time is slow.
-          You can't just open five terminals and hope for the best.
-          They'll conflict on files, stomp on each other's branches, and you'll lose track of who's doing what.
-        </p>
-      </div>
-      <div class="mt-12 grid md:grid-cols-3 gap-6">
-        <div class="p-6 bg-comb rounded-xl card-glow">
-          <div class="text-nectar text-2xl mb-3">1</div>
-          <h3 class="text-white font-semibold mb-2">Isolation</h3>
-          <p class="text-smoke text-sm leading-relaxed">Agents need isolated environments. Shared working directories mean merge conflicts, partial writes, and corrupted state.</p>
+      <h2 class="text-center text-lg font-semibold text-smoke mb-8">Works with</h2>
+      <div class="grid grid-cols-3 md:grid-cols-6 gap-4 max-w-3xl mx-auto">
+        <div class="integration-item">
+          <div class="integration-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#F5A623" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="text-white text-xs font-medium">Claude</span>
+          <span class="text-[10px] text-honey font-mono">required</span>
         </div>
-        <div class="p-6 bg-comb rounded-xl card-glow">
-          <div class="text-nectar text-2xl mb-3">2</div>
-          <h3 class="text-white font-semibold mb-2">Coordination</h3>
-          <p class="text-smoke text-sm leading-relaxed">Someone needs to break work into tasks, assign them, and know when something needs human attention. That's a full-time job.</p>
+        <div class="integration-item">
+          <div class="integration-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="3" width="18" height="18" rx="4" stroke="#6B5E54" stroke-width="1.5"/>
+              <path d="M8 12h8M12 8v8" stroke="#6B5E54" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="text-white text-xs font-medium">Codex</span>
+          <span class="text-[10px] text-smoke font-mono">optional</span>
         </div>
-        <div class="p-6 bg-comb rounded-xl card-glow">
-          <div class="text-nectar text-2xl mb-3">3</div>
-          <h3 class="text-white font-semibold mb-2">Visibility</h3>
-          <p class="text-smoke text-sm leading-relaxed">When five agents are working, you need a single pane of glass. What's running? What's stuck? What opened a PR? What broke?</p>
+        <div class="integration-item">
+          <div class="integration-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" class="text-smoke">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+          </div>
+          <span class="text-white text-xs font-medium">GitHub</span>
+          <span class="text-[10px] text-smoke font-mono">via gh CLI</span>
+        </div>
+        <div class="integration-item">
+          <div class="integration-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M21 3L1 11l8 2m12-10l-8 18-4-8m12-10l-12 10" stroke="#6B5E54" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="text-white text-xs font-medium">Telegram</span>
+          <span class="text-[10px] text-smoke font-mono">optional</span>
+        </div>
+        <div class="integration-item">
+          <div class="integration-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="9" stroke="#6B5E54" stroke-width="1.5"/>
+              <path d="M12 8v4l3 3" stroke="#6B5E54" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="text-white text-xs font-medium">Sentry</span>
+          <span class="text-[10px] text-smoke font-mono">optional</span>
+        </div>
+        <div class="integration-item">
+          <div class="integration-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M4 6h16M4 12h16M4 18h10" stroke="#6B5E54" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="text-white text-xs font-medium">Linear</span>
+          <span class="text-[10px] text-smoke font-mono">optional</span>
         </div>
       </div>
     </div>
@@ -300,78 +379,163 @@
   <section id="how-it-works" class="py-24 border-t border-slate">
     <div class="max-w-6xl mx-auto px-6">
       <h2 class="text-3xl font-bold text-white mb-4">How it works</h2>
-      <p class="text-smoke text-lg max-w-2xl mb-16">Three layers, each doing one thing well. Use them together or pick just what you need.</p>
+      <p class="text-smoke text-lg max-w-2xl mb-16">Four steps. One command. Bee handles the rest.</p>
 
-      <div class="space-y-20">
-        <!-- Swarm -->
-        <div class="grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <div class="inline-flex items-center gap-2 mb-4">
-              <span class="text-honey font-mono font-bold text-lg">swarm</span>
-              <span class="px-2 py-0.5 bg-wax rounded text-xs text-smoke">agent multiplexer</span>
+      <div class="grid md:grid-cols-4 gap-6 md:gap-8">
+        <!-- Step 1 -->
+        <div class="step-card text-center">
+          <div class="step-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="#F5A623" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="step-connector">&#8594;</div>
+          <h3 class="text-white font-semibold mb-2">Describe a task</h3>
+          <p class="text-smoke text-sm leading-relaxed">Tell Bee what you need in plain English. She understands your codebase.</p>
+        </div>
+        <!-- Step 2 -->
+        <div class="step-card text-center">
+          <div class="step-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="3" stroke="#F5A623" stroke-width="1.5"/>
+              <path d="M12 2v4m0 12v4m10-10h-4M6 12H2m15.07-7.07l-2.83 2.83M9.76 14.24l-2.83 2.83m11.14 0l-2.83-2.83M9.76 9.76L6.93 6.93" stroke="#F5A623" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="step-connector">&#8594;</div>
+          <h3 class="text-white font-semibold mb-2">Bee dispatches a worker</h3>
+          <p class="text-smoke text-sm leading-relaxed">Each worker gets its own git worktree. No conflicts, no babysitting.</p>
+        </div>
+        <!-- Step 3 -->
+        <div class="step-card text-center">
+          <div class="step-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M15 22v-4a4.8 4.8 0 00-1-3.5c3.5 0 7-1.5 7-6.5a5 5 0 00-1.5-3.5 4.6 4.6 0 00-.1-3.5s-1.2-.4-4 1.5a13.4 13.4 0 00-7 0c-2.8-1.9-4-1.5-4-1.5a4.6 4.6 0 00-.1 3.5A5 5 0 003 10.5c0 5 3.5 6.5 7 6.5a4.8 4.8 0 00-1 3.5v4" stroke="#F5A623" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M9 18c-4.5 2-5-2-7-2" stroke="#F5A623" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="step-connector">&#8594;</div>
+          <h3 class="text-white font-semibold mb-2">Worker writes code + opens PR</h3>
+          <p class="text-smoke text-sm leading-relaxed">The agent commits, pushes, and opens a pull request — all autonomously.</p>
+        </div>
+        <!-- Step 4 -->
+        <div class="step-card text-center">
+          <div class="step-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M22 17H2a3 3 0 003 3h14a3 3 0 003-3zM6 7v7m4-9v9m4-6v6m4-4v4" stroke="#F5A623" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3 class="text-white font-semibold mb-2">Bee notifies you when done</h3>
+          <p class="text-smoke text-sm leading-relaxed">See everything in the TUI, or get a Telegram ping. Review and merge.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem -->
+  <section class="py-24 border-t border-slate">
+    <div class="max-w-6xl mx-auto px-6">
+      <h2 class="text-3xl font-bold text-white mb-12">The problem with running multiple agents</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="p-6 bg-comb rounded-xl card-glow">
+          <div class="text-nectar text-2xl mb-3 font-bold">Agents conflict</div>
+          <p class="text-smoke text-sm leading-relaxed">Apiari isolates each agent in its own git worktree. No shared files, no merge conflicts, no corrupted state.</p>
+        </div>
+        <div class="p-6 bg-comb rounded-xl card-glow">
+          <div class="text-nectar text-2xl mb-3 font-bold">Too many tabs</div>
+          <p class="text-smoke text-sm leading-relaxed">One TUI to see everything. What's running, what's stuck, what opened a PR, what needs your attention.</p>
+        </div>
+        <div class="p-6 bg-comb rounded-xl card-glow">
+          <div class="text-nectar text-2xl mb-3 font-bold">Manual babysitting</div>
+          <p class="text-smoke text-sm leading-relaxed">Bee coordinates so you don't have to. She breaks down work, dispatches agents, and flags anything that needs a human.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Getting started -->
+  <section id="get-started" class="py-24 border-t border-slate">
+    <div class="max-w-6xl mx-auto px-6">
+      <h2 class="text-3xl font-bold text-white mb-4">Get started</h2>
+      <p class="text-smoke text-lg max-w-xl mb-12">Two commands. Bee will guide you through the rest. Works out of the box with Claude and gh CLI.</p>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Main install -->
+        <div class="p-6 bg-comb rounded-xl card-glow">
+          <h3 class="text-honey font-mono font-bold mb-4">Install + run</h3>
+          <!-- Platform tabs -->
+          <div class="flex gap-1 mb-3" data-tabs="apiari-install">
+            <button class="px-3 py-1 text-xs rounded font-mono transition tab-active" data-tab="binstall">cargo binstall</button>
+            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="macos">macOS</button>
+            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="linux">Linux</button>
+          </div>
+          <div data-tab-content="apiari-install">
+            <div class="tui-box p-4 text-[12px] space-y-1" data-panel="binstall">
+              <div><span class="text-smoke">$</span> <span class="text-frost">cargo binstall apiari</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">apiari</span></div>
+              <div class="text-smoke mt-2"># That's it. Bee handles onboarding.</div>
+              <div class="text-smoke"># cargo binstall downloads pre-built binaries.</div>
+              <div class="text-smoke"># Install it first: cargo install cargo-binstall</div>
             </div>
-            <h3 class="text-2xl font-bold text-white mb-4">Parallel agents in isolated worktrees</h3>
-            <p class="text-smoke leading-relaxed mb-6">
-              Swarm creates a git worktree for each task, spawns an AI agent as a daemon process,
-              and gives you a full-screen TUI to monitor all of them. Each agent has its own branch,
-              its own copy of the code, and can commit and push independently.
-            </p>
-            <div class="space-y-3 text-sm">
-              <div class="flex items-start gap-3">
-                <span class="text-honey mt-0.5">&#9656;</span>
-                <span class="text-frost">Git worktree per task — zero file conflicts</span>
-              </div>
-              <div class="flex items-start gap-3">
-                <span class="text-honey mt-0.5">&#9656;</span>
-                <span class="text-frost">Agents run as daemon processes with full terminal I/O</span>
-              </div>
-              <div class="flex items-start gap-3">
-                <span class="text-honey mt-0.5">&#9656;</span>
-                <span class="text-frost">One-keystroke merge when an agent's work is done</span>
-              </div>
-              <div class="flex items-start gap-3">
-                <span class="text-honey mt-0.5">&#9656;</span>
-                <span class="text-frost">CLI + IPC for scripting and external integration</span>
-              </div>
+            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="macos">
+              <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/apiari/releases/latest/download/apiari-aarch64-apple-darwin -o ~/.local/bin/apiari && chmod +x ~/.local/bin/apiari</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">apiari</span></div>
+              <div class="text-smoke mt-2"># That's it. Bee handles onboarding.</div>
+            </div>
+            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="linux">
+              <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/apiari/releases/latest/download/apiari-x86_64-unknown-linux-gnu -o ~/.local/bin/apiari && chmod +x ~/.local/bin/apiari</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">apiari</span></div>
+              <div class="text-smoke mt-2"># That's it. Bee handles onboarding.</div>
             </div>
           </div>
-          <div id="swarm-terminal" class="tui-box p-4 text-[13px] overflow-hidden"></div>
         </div>
 
-        <!-- Apiari -->
-        <div class="grid lg:grid-cols-2 gap-12 items-center">
-          <div class="lg:order-2">
-            <div class="inline-flex items-center gap-2 mb-4">
-              <span class="text-honey font-mono font-bold text-lg">apiari</span>
-              <span class="px-2 py-0.5 bg-wax rounded text-xs text-smoke">unified CLI + dashboard</span>
+        <!-- Just swarm -->
+        <div class="p-6 bg-comb rounded-xl card-glow">
+          <h3 class="text-honey font-mono font-bold mb-4">Just swarm (no coordinator)</h3>
+          <p class="text-smoke text-sm mb-4">Run agents in parallel without the coordinator. Manual mode.</p>
+          <!-- Platform tabs -->
+          <div class="flex gap-1 mb-3" data-tabs="swarm-install">
+            <button class="px-3 py-1 text-xs rounded font-mono transition tab-active" data-tab="binstall">cargo binstall</button>
+            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="macos">macOS</button>
+            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="linux">Linux</button>
+          </div>
+          <div data-tab-content="swarm-install">
+            <div class="tui-box p-4 text-[12px] space-y-1" data-panel="binstall">
+              <div><span class="text-smoke">$</span> <span class="text-frost">cargo binstall swarm</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">swarm</span></div>
+              <div class="text-smoke mt-2"># Press n to create a worker, type your task, go.</div>
             </div>
-            <h3 class="text-2xl font-bold text-white mb-4">Coordinate everything from one place</h3>
-            <p class="text-smoke leading-relaxed mb-6">
-              Apiari is the command center. It runs a persistent daemon that watches your agents,
-              aggregates signals from Sentry and GitHub, and connects you to an AI coordinator
-              via Telegram or the built-in TUI. Chat with your coordinator from your phone,
-              get notifications when agents finish, and manage multiple workspaces.
-            </p>
-            <div class="space-y-3 text-sm">
-              <div class="flex items-start gap-3">
-                <span class="text-honey mt-0.5">&#9656;</span>
-                <span class="text-frost">AI coordinator with full codebase context</span>
-              </div>
-              <div class="flex items-start gap-3">
-                <span class="text-honey mt-0.5">&#9656;</span>
-                <span class="text-frost">Telegram bot — chat with your coordinator from anywhere</span>
-              </div>
-              <div class="flex items-start gap-3">
-                <span class="text-honey mt-0.5">&#9656;</span>
-                <span class="text-frost">Signal aggregation — Sentry errors, GitHub issues, PRs</span>
-              </div>
-              <div class="flex items-start gap-3">
-                <span class="text-honey mt-0.5">&#9656;</span>
-                <span class="text-frost">Multi-workspace support with per-project config</span>
-              </div>
+            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="macos">
+              <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/swarm/releases/latest/download/swarm-aarch64-apple-darwin -o ~/.local/bin/swarm && chmod +x ~/.local/bin/swarm</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">swarm</span></div>
+              <div class="text-smoke mt-2"># Press n to create a worker, type your task, go.</div>
+            </div>
+            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="linux">
+              <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/swarm/releases/latest/download/swarm-x86_64-unknown-linux-gnu -o ~/.local/bin/swarm && chmod +x ~/.local/bin/swarm</span></div>
+              <div><span class="text-smoke">$</span> <span class="text-frost">swarm</span></div>
+              <div class="text-smoke mt-2"># Press n to create a worker, type your task, go.</div>
             </div>
           </div>
-          <div id="apiari-terminal" class="lg:order-1 tui-box p-4 text-[13px] overflow-hidden"></div>
+        </div>
+      </div>
+
+      <!-- Requirements -->
+      <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="p-4 bg-comb rounded-lg">
+          <div class="text-honey font-mono font-bold text-sm mb-1">claude CLI</div>
+          <p class="text-smoke text-xs">Required. Claude Code for agent execution.</p>
+        </div>
+        <div class="p-4 bg-comb rounded-lg">
+          <div class="text-honey font-mono font-bold text-sm mb-1">gh CLI</div>
+          <p class="text-smoke text-xs">Recommended. For PRs and GitHub integration.</p>
+        </div>
+        <div class="p-4 bg-comb rounded-lg">
+          <div class="text-honey font-mono font-bold text-sm mb-1">macOS / Linux</div>
+          <p class="text-smoke text-xs">Terminal-native. Works anywhere with a shell.</p>
+        </div>
+        <div class="p-4 bg-comb rounded-lg">
+          <div class="text-honey font-mono font-bold text-sm mb-1">codex CLI</div>
+          <p class="text-smoke text-xs">Optional. Alternative agent backend.</p>
         </div>
       </div>
     </div>
@@ -427,135 +591,59 @@
     </div>
   </section>
 
-  <!-- Architecture -->
+  <!-- Under the hood (collapsible architecture + terminal demos) -->
   <section id="architecture" class="py-24 border-t border-slate">
     <div class="max-w-6xl mx-auto px-6">
-      <h2 class="text-3xl font-bold text-white mb-4">Architecture</h2>
-      <p class="text-smoke text-lg max-w-2xl mb-12">Two distinct flows — use swarm standalone for parallel agents, or add apiari for full orchestration.</p>
-
-      <div class="space-y-16">
-        <!-- Swarm flow -->
+      <button class="collapsible-toggle w-full flex items-center justify-between text-left" id="hood-toggle">
         <div>
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-bold text-white">Swarm: parallel agent execution</h3>
-            <button id="swarm-diagram-toggle" class="text-xs text-smoke hover:text-frost border border-slate rounded px-2 py-1 transition" title="Play/Pause">&#9654; Pause</button>
-          </div>
-          <div id="swarm-diagram" class="arch-diagram tui-box p-6 sm:p-8 overflow-hidden"></div>
+          <h2 class="text-3xl font-bold text-white">Under the hood</h2>
+          <p class="text-smoke text-lg mt-2">Architecture diagrams and live terminal demos for the technically curious.</p>
         </div>
+        <svg class="w-6 h-6 text-smoke shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
 
-        <!-- Apiari flow -->
-        <div>
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-bold text-white">Apiari: full orchestration</h3>
-            <button id="apiari-diagram-toggle" class="text-xs text-smoke hover:text-frost border border-slate rounded px-2 py-1 transition" title="Play/Pause">&#9654; Pause</button>
-          </div>
-          <div id="apiari-diagram" class="arch-diagram tui-box p-6 sm:p-8 overflow-hidden"></div>
-        </div>
-      </div>
-    </div>
-  </section>
+      <div class="collapsible-content" id="hood-content">
+        <div class="pt-12 space-y-20">
+          <!-- Architecture diagrams -->
+          <div>
+            <h3 class="text-xl font-bold text-white mb-8">Architecture</h3>
+            <p class="text-smoke mb-12">Two distinct flows — use swarm standalone for parallel agents, or add apiari for full orchestration.</p>
 
-  <!-- Getting started -->
-  <section class="py-24 border-t border-slate">
-    <div class="max-w-6xl mx-auto px-6">
-      <h2 class="text-3xl font-bold text-white mb-12">Get started</h2>
+            <div class="space-y-16">
+              <!-- Swarm flow -->
+              <div>
+                <div class="flex items-center justify-between mb-6">
+                  <h4 class="text-lg font-bold text-white">Swarm: parallel agent execution</h4>
+                  <button id="swarm-diagram-toggle" class="text-xs text-smoke hover:text-frost border border-slate rounded px-2 py-1 transition" title="Play/Pause">&#9654; Pause</button>
+                </div>
+                <div id="swarm-diagram" class="arch-diagram tui-box p-6 sm:p-8 overflow-hidden"></div>
+              </div>
 
-      <div class="grid md:grid-cols-2 gap-8">
-        <!-- Swarm quickstart -->
-        <div class="p-6 bg-comb rounded-xl card-glow">
-          <h3 class="text-honey font-mono font-bold mb-4">Just swarm (simplest)</h3>
-          <p class="text-smoke text-sm mb-4">Run agents in parallel on any project. No config needed.</p>
-          <!-- Platform tabs -->
-          <div class="flex gap-1 mb-3" data-tabs="swarm-install">
-            <button class="px-3 py-1 text-xs rounded font-mono transition tab-active" data-tab="binstall">cargo binstall</button>
-            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="macos">macOS</button>
-            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="linux">Linux</button>
-          </div>
-          <div data-tab-content="swarm-install">
-            <div class="tui-box p-4 text-[12px] space-y-1" data-panel="binstall">
-              <div><span class="text-smoke">$</span> <span class="text-frost">cargo binstall swarm</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">swarm</span></div>
-              <div class="text-smoke"># Press n to create a worker, type your task, go.</div>
-              <div class="text-smoke mt-1"># cargo binstall downloads pre-built binaries.</div>
-              <div class="text-smoke"># Install it first: cargo install cargo-binstall</div>
-            </div>
-            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="macos">
-              <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/swarm/releases/latest/download/swarm-aarch64-apple-darwin -o ~/.local/bin/swarm && chmod +x ~/.local/bin/swarm</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">swarm</span></div>
-              <div class="text-smoke"># Press n to create a worker, type your task, go.</div>
-            </div>
-            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="linux">
-              <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/swarm/releases/latest/download/swarm-x86_64-unknown-linux-gnu -o ~/.local/bin/swarm && chmod +x ~/.local/bin/swarm</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">swarm</span></div>
-              <div class="text-smoke"># Press n to create a worker, type your task, go.</div>
+              <!-- Apiari flow -->
+              <div>
+                <div class="flex items-center justify-between mb-6">
+                  <h4 class="text-lg font-bold text-white">Apiari: full orchestration</h4>
+                  <button id="apiari-diagram-toggle" class="text-xs text-smoke hover:text-frost border border-slate rounded px-2 py-1 transition" title="Play/Pause">&#9654; Pause</button>
+                </div>
+                <div id="apiari-diagram" class="arch-diagram tui-box p-6 sm:p-8 overflow-hidden"></div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Full stack -->
-        <div class="p-6 bg-comb rounded-xl card-glow">
-          <h3 class="text-honey font-mono font-bold mb-4">Full orchestration</h3>
-          <p class="text-smoke text-sm mb-4">Add the coordinator, signals, and Telegram notifications.</p>
-          <!-- Platform tabs -->
-          <div class="flex gap-1 mb-3" data-tabs="apiari-install">
-            <button class="px-3 py-1 text-xs rounded font-mono transition tab-active" data-tab="binstall">cargo binstall</button>
-            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="macos">macOS</button>
-            <button class="px-3 py-1 text-xs rounded font-mono transition" data-tab="linux">Linux</button>
-          </div>
-          <div data-tab-content="apiari-install">
-            <div class="tui-box p-4 text-[12px] space-y-1" data-panel="binstall">
-              <div><span class="text-smoke">$</span> <span class="text-frost">cargo binstall apiari</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">apiari</span></div>
-              <div class="text-smoke"># TUI opens automatically. Onboarding handles setup.</div>
-              <div class="text-smoke mt-1"># cargo binstall downloads pre-built binaries.</div>
-              <div class="text-smoke"># Install it first: cargo install cargo-binstall</div>
-            </div>
-            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="macos">
-              <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/apiari/releases/latest/download/apiari-aarch64-apple-darwin -o ~/.local/bin/apiari && chmod +x ~/.local/bin/apiari</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">apiari</span></div>
-              <div class="text-smoke"># TUI opens automatically. Onboarding handles setup.</div>
-            </div>
-            <div class="tui-box p-4 text-[12px] space-y-1 hidden" data-panel="linux">
-              <div><span class="text-smoke">$</span> <span class="text-frost">curl -L https://github.com/ApiariTools/apiari/releases/latest/download/apiari-x86_64-unknown-linux-gnu -o ~/.local/bin/apiari && chmod +x ~/.local/bin/apiari</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">cd ~/my-project</span></div>
-              <div><span class="text-smoke">$</span> <span class="text-frost">apiari</span></div>
-              <div class="text-smoke"># TUI opens automatically. Onboarding handles setup.</div>
+          <!-- Terminal demos -->
+          <div>
+            <h3 class="text-xl font-bold text-white mb-8">Live terminal demos</h3>
+            <div class="grid lg:grid-cols-2 gap-8">
+              <div>
+                <p class="text-smoke text-sm mb-3">swarm — agent working in a worktree</p>
+                <div id="swarm-terminal" class="tui-box p-4 text-[13px] overflow-hidden"></div>
+              </div>
+              <div>
+                <p class="text-smoke text-sm mb-3">apiari — coordinator dashboard</p>
+                <div id="apiari-terminal" class="tui-box p-4 text-[13px] overflow-hidden"></div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Requirements -->
-  <section class="py-24 border-t border-slate">
-    <div class="max-w-6xl mx-auto px-6">
-      <h2 class="text-3xl font-bold text-white mb-8">Requirements</h2>
-      <div class="grid md:grid-cols-3 lg:grid-cols-5 gap-6">
-        <div class="p-4 bg-comb rounded-lg">
-          <div class="text-honey font-mono font-bold mb-2">~/.local/bin</div>
-          <p class="text-smoke text-sm">Pre-built binaries. Or build from source with Rust 1.93+.</p>
-        </div>
-        <div class="p-4 bg-comb rounded-lg">
-          <div class="text-honey font-mono font-bold mb-2">claude CLI</div>
-          <p class="text-smoke text-sm">Claude Code for agent execution.</p>
-        </div>
-        <div class="p-4 bg-comb rounded-lg">
-          <div class="text-honey font-mono font-bold mb-2">codex CLI</div>
-          <p class="text-smoke text-sm">Optional. Alternative to claude for codex users.</p>
-        </div>
-        <div class="p-4 bg-comb rounded-lg">
-          <div class="text-honey font-mono font-bold mb-2">gh CLI</div>
-          <p class="text-smoke text-sm">Optional. For PR tracking + GitHub signal watcher.</p>
-        </div>
-        <div class="p-4 bg-comb rounded-lg">
-          <div class="text-honey font-mono font-bold mb-2">macOS / Linux</div>
-          <p class="text-smoke text-sm">Terminal-native. Works anywhere you have a shell.</p>
         </div>
       </div>
     </div>
@@ -599,6 +687,16 @@
         });
       });
     });
+
+    // Collapsible "Under the hood" section
+    var hoodToggle = document.getElementById('hood-toggle');
+    var hoodContent = document.getElementById('hood-content');
+    if (hoodToggle && hoodContent) {
+      hoodToggle.addEventListener('click', function() {
+        hoodContent.classList.toggle('open');
+        hoodToggle.classList.toggle('open');
+      });
+    }
   </script>
 </body>
 </html>
