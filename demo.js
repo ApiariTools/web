@@ -882,11 +882,13 @@
     var prCheck = svgText(860, 158, '\u2714 PR', { fill: COLORS.mint, size: '12', weight: '600' });
     prCheck.style.opacity = '0';
 
-    // -- Telegram notification bubble (hidden, toggled per step) --
+    // -- Notification bubble (hidden, toggled per step) --
     var telegramBubble = svgEl('g');
     telegramBubble.style.opacity = '0';
-    telegramBubble.appendChild(svgRect(15, 85, 110, 30, { rx: '12', stroke: COLORS.honey, fill: COLORS.wax, sw: '1' }));
-    telegramBubble.appendChild(svgText(70, 105, 'PR opened!', { fill: COLORS.honey, size: '10', weight: '500' }));
+    var bubbleRect = svgRect(15, 85, 110, 30, { rx: '12', stroke: COLORS.honey, fill: COLORS.wax, sw: '1' });
+    telegramBubble.appendChild(bubbleRect);
+    var bubbleText = svgText(70, 105, 'PR opened!', { fill: COLORS.honey, size: '10', weight: '500' });
+    telegramBubble.appendChild(bubbleText);
 
     svg.appendChild(staticG);
     svg.appendChild(prCheck);
@@ -895,6 +897,152 @@
     container.appendChild(svg);
 
     var state = { running: true, paused: false };
+    var cycleCount = 0;
+
+    // Helper: set notification bubble text and color
+    function setBubble(text, color) {
+      bubbleText.textContent = text;
+      bubbleText.setAttribute('fill', color);
+      bubbleRect.setAttribute('stroke', color);
+    }
+
+    async function runGitHubCycle() {
+      // Step 1: GitHub signal → signals box (orange dot via webhook path)
+      while (state.paused) { await sleep(100); if (!state.running) return; }
+      fireOnceDot(animG, 860, 165, 860, 340, { color: COLORS.nectar, duration: 600, radius: 5 });
+      await sleep(700);
+      if (!state.running) return;
+      fireOnceDot(animG, 860, 340, 610, 340, { color: COLORS.nectar, duration: 600, radius: 5 });
+      await sleep(700);
+      if (!state.running) return;
+      glowPulse(signalsRect, COLORS.nectar, 600);
+
+      // Signal → daemon
+      fireOnceDot(animG, 465, 310, 380, 210, { color: COLORS.nectar, duration: 800, radius: 5 });
+      await sleep(900);
+      if (!state.running) return;
+
+      // Step 2: Coordinator "thinking" glow
+      while (state.paused) { await sleep(100); if (!state.running) return; }
+      glowPulse(daemonRect, COLORS.honey, 1200);
+      glowPulse(coordText, COLORS.honey, 1200);
+      await sleep(1300);
+      if (!state.running) return;
+
+      // Step 3: Dispatch dots daemon → swarm (honey dot)
+      while (state.paused) { await sleep(100); if (!state.running) return; }
+      fireOnceDot(animG, 380, 150, 465, 110, { color: COLORS.honey, duration: 800, radius: 5 });
+      await sleep(900);
+      if (!state.running) return;
+      glowPulse(swarmRect, COLORS.honey, 600);
+      await sleep(700);
+      if (!state.running) return;
+
+      // Step 4: Worker spawn — dispatch dots swarm → workers, then highlight
+      while (state.paused) { await sleep(100); if (!state.running) return; }
+      workerData.forEach(function (a, i) {
+        setTimeout(function () {
+          if (!state.running) return;
+          fireOnceDot(animG, 610, 110, 660, a.y + 22, { color: COLORS.honey, duration: 700, radius: 4 });
+        }, i * 250);
+      });
+      await sleep(1000);
+      if (!state.running) return;
+      for (var i = 0; i < workerRects.length; i++) {
+        glowPulse(workerRects[i], COLORS.mint, 500);
+        await sleep(300);
+        if (!state.running) return;
+      }
+      await sleep(500);
+      if (!state.running) return;
+
+      // Step 5: Push dots workers → GitHub (mint dots)
+      while (state.paused) { await sleep(100); if (!state.running) return; }
+      workerData.forEach(function (a, i) {
+        setTimeout(function () {
+          if (!state.running) return;
+          fireOnceDot(animG, 760, a.y + 22, 790, 125, { color: COLORS.mint, duration: 900, radius: 4 });
+        }, i * 350);
+      });
+      await sleep(1600);
+      if (!state.running) return;
+
+      // Step 6: PR checkmark on GitHub
+      while (state.paused) { await sleep(100); if (!state.running) return; }
+      prCheck.style.opacity = '1';
+      prCheck.style.animation = 'checkPop 0.4s ease-out';
+      glowPulse(ghRect, COLORS.mint, 600);
+      await sleep(1000);
+      if (!state.running) return;
+
+      // Step 7: PR notification chain — GitHub fires event back through webhooks → signals → daemon → You
+      while (state.paused) { await sleep(100); if (!state.running) return; }
+      // GitHub event travels down webhook path to signals
+      fireOnceDot(animG, 860, 165, 860, 340, { color: COLORS.nectar, duration: 600, radius: 5 });
+      await sleep(700);
+      if (!state.running) return;
+      fireOnceDot(animG, 860, 340, 610, 340, { color: COLORS.nectar, duration: 600, radius: 5 });
+      await sleep(700);
+      if (!state.running) return;
+      // Signals box glows
+      glowPulse(signalsRect, COLORS.nectar, 600);
+      await sleep(400);
+      if (!state.running) return;
+      // Dot travels signals → daemon
+      fireOnceDot(animG, 465, 310, 380, 210, { color: COLORS.nectar, duration: 800, radius: 5 });
+      await sleep(900);
+      if (!state.running) return;
+      // Daemon thinks briefly
+      glowPulse(daemonRect, COLORS.honey, 800);
+      glowPulse(coordText, COLORS.honey, 800);
+      await sleep(900);
+      if (!state.running) return;
+      // Dot fires daemon → You
+      fireOnceDot(animG, 200, 170, 125, 170, { color: COLORS.honey, duration: 800, radius: 4 });
+      await sleep(900);
+      if (!state.running) return;
+
+      setBubble('PR opened!', COLORS.honey);
+      telegramBubble.style.opacity = '1';
+      telegramBubble.style.animation = 'bubbleSlide 0.4s ease-out';
+      glowPulse(youRect, COLORS.honey, 600);
+      await sleep(1200);
+      if (!state.running) return;
+    }
+
+    async function runSentryCycle() {
+      // Sentry signal: dot appears directly at signals box (polling, not webhooks)
+      while (state.paused) { await sleep(100); if (!state.running) return; }
+      glowPulse(signalsRect, COLORS.nectar, 800);
+      await sleep(900);
+      if (!state.running) return;
+
+      // Dot travels signals → daemon
+      while (state.paused) { await sleep(100); if (!state.running) return; }
+      fireOnceDot(animG, 465, 310, 380, 210, { color: COLORS.nectar, duration: 800, radius: 5 });
+      await sleep(900);
+      if (!state.running) return;
+
+      // Coordinator thinks
+      while (state.paused) { await sleep(100); if (!state.running) return; }
+      glowPulse(daemonRect, COLORS.honey, 1200);
+      glowPulse(coordText, COLORS.honey, 1200);
+      await sleep(1300);
+      if (!state.running) return;
+
+      // Daemon notifies You
+      while (state.paused) { await sleep(100); if (!state.running) return; }
+      fireOnceDot(animG, 200, 170, 125, 170, { color: COLORS.nectar, duration: 800, radius: 4 });
+      await sleep(900);
+      if (!state.running) return;
+
+      setBubble('\uD83D\uDD34 Sentry error', COLORS.nectar);
+      telegramBubble.style.opacity = '1';
+      telegramBubble.style.animation = 'bubbleSlide 0.4s ease-out';
+      glowPulse(youRect, COLORS.nectar, 600);
+      await sleep(1200);
+      if (!state.running) return;
+    }
 
     async function runLoop() {
       while (state.running) {
@@ -906,88 +1054,16 @@
         await sleep(800);
         if (!state.running) return;
 
-        // Step 1: GitHub signal → apiari daemon (orange dot via webhook path)
-        while (state.paused) { await sleep(100); if (!state.running) return; }
-        fireOnceDot(animG, 860, 165, 860, 340, { color: COLORS.nectar, duration: 600, radius: 5 });
-        await sleep(700);
-        if (!state.running) return;
-        fireOnceDot(animG, 860, 340, 610, 340, { color: COLORS.nectar, duration: 600, radius: 5 });
-        await sleep(700);
-        if (!state.running) return;
-        glowPulse(signalsRect, COLORS.nectar, 600);
-
-        // Signal → daemon
-        fireOnceDot(animG, 465, 310, 380, 210, { color: COLORS.nectar, duration: 800, radius: 5 });
-        await sleep(900);
-        if (!state.running) return;
-
-        // Step 2: Coordinator "thinking" glow
-        while (state.paused) { await sleep(100); if (!state.running) return; }
-        glowPulse(daemonRect, COLORS.honey, 1200);
-        glowPulse(coordText, COLORS.honey, 1200);
-        await sleep(1300);
-        if (!state.running) return;
-
-        // Step 3: Dispatch dots daemon → swarm (honey dot)
-        while (state.paused) { await sleep(100); if (!state.running) return; }
-        fireOnceDot(animG, 380, 150, 465, 110, { color: COLORS.honey, duration: 800, radius: 5 });
-        await sleep(900);
-        if (!state.running) return;
-        glowPulse(swarmRect, COLORS.honey, 600);
-        await sleep(700);
-        if (!state.running) return;
-
-        // Step 4: Worker spawn — dispatch dots swarm → workers, then highlight
-        while (state.paused) { await sleep(100); if (!state.running) return; }
-        workerData.forEach(function (a, i) {
-          setTimeout(function () {
-            if (!state.running) return;
-            fireOnceDot(animG, 610, 110, 660, a.y + 22, { color: COLORS.honey, duration: 700, radius: 4 });
-          }, i * 250);
-        });
-        await sleep(1000);
-        if (!state.running) return;
-        // Green highlight on each worker
-        for (var i = 0; i < workerRects.length; i++) {
-          glowPulse(workerRects[i], COLORS.mint, 500);
-          await sleep(300);
-          if (!state.running) return;
+        if (cycleCount % 2 === 0) {
+          await runGitHubCycle();
+        } else {
+          await runSentryCycle();
         }
-        await sleep(500);
         if (!state.running) return;
 
-        // Step 5: Push dots workers → GitHub (mint dots)
-        while (state.paused) { await sleep(100); if (!state.running) return; }
-        workerData.forEach(function (a, i) {
-          setTimeout(function () {
-            if (!state.running) return;
-            fireOnceDot(animG, 760, a.y + 22, 790, 125, { color: COLORS.mint, duration: 900, radius: 4 });
-          }, i * 350);
-        });
-        await sleep(1600);
-        if (!state.running) return;
+        cycleCount++;
 
-        // Step 6: PR checkmark on GitHub
-        while (state.paused) { await sleep(100); if (!state.running) return; }
-        prCheck.style.opacity = '1';
-        prCheck.style.animation = 'checkPop 0.4s ease-out';
-        glowPulse(ghRect, COLORS.mint, 600);
-        await sleep(1000);
-        if (!state.running) return;
-
-        // Step 7: Notification dot daemon → You (honey dot)
-        while (state.paused) { await sleep(100); if (!state.running) return; }
-        fireOnceDot(animG, 200, 170, 125, 170, { color: COLORS.honey, duration: 800, radius: 4 });
-        await sleep(900);
-        if (!state.running) return;
-
-        telegramBubble.style.opacity = '1';
-        telegramBubble.style.animation = 'bubbleSlide 0.4s ease-out';
-        glowPulse(youRect, COLORS.honey, 600);
-        await sleep(1200);
-        if (!state.running) return;
-
-        // Step 8: Pause, then repeat
+        // Pause, then repeat
         await sleep(2000);
         if (!state.running) return;
       }
