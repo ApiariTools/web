@@ -1072,6 +1072,749 @@
     return state;
   }
 
+  // ─── Fullscreen Modal ─────────────────────────────────────────
+
+  function openFullscreen(terminalInstance) {
+    var overlay = el('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;';
+
+    var modal = el('div');
+    modal.style.cssText = 'position:relative;width:100%;max-width:900px;height:80vh;margin:20px;';
+
+    var closeBtn = el('button', '', '\u00D7');
+    closeBtn.style.cssText = 'position:absolute;top:-36px;right:0;background:none;border:none;color:' + COLORS.smoke + ';font-size:28px;cursor:pointer;z-index:10;padding:4px 8px;';
+    closeBtn.onmouseenter = function () { closeBtn.style.color = COLORS.white; };
+    closeBtn.onmouseleave = function () { closeBtn.style.color = COLORS.smoke; };
+
+    var origParent = terminalInstance.root.parentNode;
+    var origNext = terminalInstance.root.nextSibling;
+    var origStyles = {
+      height: terminalInstance.root.style.height,
+      minHeight: terminalInstance.root.style.minHeight,
+      maxHeight: terminalInstance.root.style.maxHeight,
+    };
+
+    terminalInstance.root.style.height = '100%';
+    terminalInstance.root.style.minHeight = '100%';
+    terminalInstance.root.style.maxHeight = '100%';
+    modal.appendChild(terminalInstance.root);
+    modal.appendChild(closeBtn);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    // Resize conversation areas
+    var chatAreas = terminalInstance.root.querySelectorAll('[data-chat-area]');
+    chatAreas.forEach(function (ca) { ca.style.maxHeight = '60vh'; });
+
+    function close() {
+      terminalInstance.root.style.height = origStyles.height;
+      terminalInstance.root.style.minHeight = origStyles.minHeight;
+      terminalInstance.root.style.maxHeight = origStyles.maxHeight;
+      chatAreas.forEach(function (ca) { ca.style.maxHeight = ''; });
+      if (origNext) origParent.insertBefore(terminalInstance.root, origNext);
+      else origParent.appendChild(terminalInstance.root);
+      overlay.remove();
+      document.removeEventListener('keydown', escHandler);
+    }
+
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+
+    function escHandler(e) { if (e.key === 'Escape') close(); }
+    document.addEventListener('keydown', escHandler);
+  }
+
+  // ─── SwarmTerminal ──────────────────────────────────────────────
+
+  class SwarmTerminal {
+    constructor(container) {
+      this.root = typeof container === 'string' ? document.getElementById(container) : container;
+      if (!this.root) return;
+      this.workers = new Map();
+      this.selectedId = null;
+      this.conversations = new Map();
+      this.aborted = false;
+      this.loopCount = 0;
+      this._build();
+    }
+
+    _build() {
+      var r = this.root;
+      r.innerHTML = '';
+      r.style.position = 'relative';
+      r.style.fontFamily = "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace";
+      r.style.fontSize = '12px';
+      r.style.lineHeight = '1.4';
+      r.style.background = COLORS.comb;
+      r.style.color = COLORS.frost;
+      r.style.overflow = 'hidden';
+
+      // Title bar with macOS dots
+      var titleBar = el('div');
+      titleBar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid ' + COLORS.slate + ';';
+
+      var dots = el('div');
+      dots.style.cssText = 'display:flex;gap:6px;';
+
+      var redDot = el('span');
+      redDot.style.cssText = 'width:12px;height:12px;border-radius:50%;background:rgba(255,107,53,0.6);display:inline-block;';
+      var yellowDot = el('span');
+      yellowDot.style.cssText = 'width:12px;height:12px;border-radius:50%;background:rgba(245,166,35,0.6);display:inline-block;';
+      var greenDot = el('span');
+      greenDot.style.cssText = 'width:12px;height:12px;border-radius:50%;background:rgba(126,200,160,0.6);display:inline-block;cursor:pointer;';
+      greenDot.title = 'Expand fullscreen';
+      var self = this;
+      greenDot.addEventListener('click', function (e) { e.stopPropagation(); openFullscreen(self); });
+
+      dots.appendChild(redDot);
+      dots.appendChild(yellowDot);
+      dots.appendChild(greenDot);
+      titleBar.appendChild(dots);
+
+      var titleText = el('span', '', 'swarm \u2014 parallel agent execution');
+      titleText.style.cssText = 'color:' + COLORS.smoke + ';font-size:11px;margin-left:8px;';
+      titleBar.appendChild(titleText);
+
+      r.appendChild(titleBar);
+
+      // Main layout: sidebar | conversation
+      var main = el('div');
+      main.style.cssText = 'display:flex;height:calc(100% - 37px);min-height:260px;';
+
+      // Left sidebar
+      var sidebar = el('div');
+      sidebar.style.cssText = 'width:220px;min-width:220px;border-right:1px solid ' + COLORS.slate + ';display:flex;flex-direction:column;overflow:hidden;';
+
+      this.sidebarHeader = el('div', '', 'WORKERS (0)');
+      this.sidebarHeader.style.cssText = 'padding:8px 10px;color:' + COLORS.honey + ';font-size:11px;font-weight:600;letter-spacing:0.5px;';
+      sidebar.appendChild(this.sidebarHeader);
+
+      var divider = el('div');
+      divider.style.cssText = 'height:1px;background:' + COLORS.slate + ';margin:0 10px;';
+      sidebar.appendChild(divider);
+
+      this.workerList = el('div');
+      this.workerList.style.cssText = 'flex:1;overflow-y:auto;padding:4px 0;';
+      sidebar.appendChild(this.workerList);
+
+      var bottomDiv = el('div');
+      bottomDiv.style.cssText = 'height:1px;background:' + COLORS.slate + ';margin:0 10px;';
+      sidebar.appendChild(bottomDiv);
+
+      var statusBar = el('div');
+      statusBar.style.cssText = 'padding:6px 10px;color:' + COLORS.smoke + ';font-size:10px;';
+      statusBar.innerHTML = ' n:new  d:dispatch  q:quit  <span style="color:' + COLORS.mint + '">\u25CF</span><span style="color:' + COLORS.mint + '">daemon</span>';
+      sidebar.appendChild(statusBar);
+
+      main.appendChild(sidebar);
+
+      // Right panel
+      var rightPanel = el('div');
+      rightPanel.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;';
+
+      this.convHeader = el('div');
+      this.convHeader.style.cssText = 'padding:8px 12px;border-bottom:1px solid ' + COLORS.slate + ';color:' + COLORS.white + ';font-size:11px;font-weight:600;';
+      this.convHeader.textContent = 'Select a worker';
+      rightPanel.appendChild(this.convHeader);
+
+      this.convArea = el('div');
+      this.convArea.style.cssText = 'flex:1;overflow-y:auto;padding:8px 12px;';
+      this.convArea.setAttribute('data-chat-area', '1');
+      rightPanel.appendChild(this.convArea);
+
+      main.appendChild(rightPanel);
+      r.appendChild(main);
+    }
+
+    addWorker(id, opts) {
+      opts = opts || {};
+      var status = opts.status || 'running';
+      var s = STATUS[status] || STATUS.running;
+      var workerEl = el('div');
+      workerEl.style.cssText = 'padding:4px 10px;cursor:pointer;transition:background 0.15s;';
+
+      // Line 1: bar + dot + id + branch
+      var line1 = el('div');
+      line1.style.cssText = 'display:flex;align-items:center;gap:4px;';
+      var bar = el('span', '', '\u258C');
+      bar.style.cssText = 'color:' + (opts.color || COLORS.smoke) + ';';
+      bar.className = '_wbar';
+      var dot = el('span');
+      dot.className = '_wdot';
+      dot.style.color = s.color;
+      dot.textContent = s.icon;
+      var nameSpan = el('span', '', id);
+      nameSpan.style.cssText = 'color:' + COLORS.white + ';font-size:12px;';
+      nameSpan.className = '_wname';
+      line1.appendChild(bar);
+      line1.appendChild(dot);
+      line1.appendChild(nameSpan);
+      if (opts.branch) {
+        var brSpan = el('span', '', opts.branch);
+        brSpan.style.cssText = 'color:' + COLORS.smoke + ';font-size:10px;margin-left:auto;';
+        line1.appendChild(brSpan);
+      }
+      workerEl.appendChild(line1);
+
+      // Line 2: agent + ago
+      var line2 = el('div');
+      line2.style.cssText = 'padding-left:20px;color:' + COLORS.smoke + ';font-size:10px;';
+      line2.textContent = '  agent: ' + (opts.agent || 'claude') + '  ' + (opts.ago || '0m ago');
+      line2.className = '_wline2';
+      workerEl.appendChild(line2);
+
+      // Line 3: task
+      if (opts.task) {
+        var line3 = el('div');
+        line3.style.cssText = 'padding-left:20px;color:' + COLORS.frost + ';font-size:10px;';
+        line3.textContent = '  feat: ' + opts.task;
+        line3.className = '_wline3';
+        workerEl.appendChild(line3);
+      }
+
+      var self = this;
+      workerEl.addEventListener('click', function () { self.setSelectedWorker(id); });
+
+      this.workerList.appendChild(workerEl);
+      this.workers.set(id, { el: workerEl, status: status, opts: opts });
+      this.conversations.set(id, []);
+      this._updateCount();
+
+      // Animate in
+      workerEl.style.opacity = '0';
+      requestAnimationFrame(function () { workerEl.style.transition = 'opacity 0.3s'; workerEl.style.opacity = '1'; });
+    }
+
+    setSelectedWorker(id) {
+      this.selectedId = id;
+      // Highlight selected
+      this.workers.forEach(function (w, wid) {
+        if (wid === id) {
+          w.el.style.background = 'rgba(245,166,35,0.1)';
+          w.el.style.borderLeft = '2px solid ' + COLORS.honey;
+        } else {
+          w.el.style.background = '';
+          w.el.style.borderLeft = '2px solid transparent';
+        }
+      });
+      // Update header
+      var w = this.workers.get(id);
+      var headerText = id;
+      if (w && w.prUrl) headerText += '  \u2192 ' + w.prUrl;
+      this.convHeader.textContent = headerText;
+      // Render conversation
+      this._renderConversation(id);
+    }
+
+    appendConversation(text, type) {
+      if (!this.selectedId) return;
+      var conv = this.conversations.get(this.selectedId);
+      if (!conv) return;
+      conv.push({ text: text, type: type || 'text' });
+      this._renderConversation(this.selectedId);
+    }
+
+    _renderConversation(id) {
+      var conv = this.conversations.get(id);
+      if (!conv) return;
+      this.convArea.innerHTML = '';
+      var self = this;
+      conv.forEach(function (item) {
+        var line = el('div');
+        line.style.cssText = 'padding:1px 0;animation:tdSlideIn 0.2s ease;';
+        if (item.type === 'tool') {
+          line.style.color = COLORS.smoke;
+          line.innerHTML = item.text;
+        } else if (item.type === 'output') {
+          line.style.color = COLORS.frost;
+          line.style.paddingLeft = '16px';
+          line.textContent = item.text;
+        } else {
+          line.style.color = COLORS.frost;
+          line.textContent = item.text;
+        }
+        self.convArea.appendChild(line);
+      });
+      this.convArea.scrollTop = this.convArea.scrollHeight;
+    }
+
+    setWorkerStatus(id, status) {
+      var w = this.workers.get(id);
+      if (!w) return;
+      var s = STATUS[status] || STATUS.running;
+      w.status = status;
+      var dot = w.el.querySelector('._wdot');
+      if (dot) { dot.textContent = s.icon; dot.style.color = s.color; }
+      var name = w.el.querySelector('._wname');
+      if (name) name.style.color = status === 'done' ? COLORS.smoke : COLORS.white;
+    }
+
+    setPrUrl(id, url) {
+      var w = this.workers.get(id);
+      if (!w) return;
+      w.prUrl = url;
+      if (this.selectedId === id) {
+        this.convHeader.textContent = id + '  \u2192 ' + url;
+      }
+    }
+
+    _updateCount() {
+      this.sidebarHeader.textContent = 'WORKERS (' + this.workers.size + ')';
+    }
+
+    _clearAll() {
+      this.workerList.innerHTML = '';
+      this.workers.clear();
+      this.conversations.clear();
+      this.selectedId = null;
+      this.convHeader.textContent = 'Select a worker';
+      this.convArea.innerHTML = '';
+      this._updateCount();
+    }
+
+    async startDemo() {
+      while (true) {
+        this.aborted = false;
+        this._clearAll();
+        await sleep(100);
+        if (this.aborted) return;
+        await swarmTerminalScript(this);
+        if (this.aborted) return;
+        this.loopCount++;
+        this.root.style.transition = 'opacity 0.5s';
+        this.root.style.opacity = '0.4';
+        await sleep(800);
+        if (this.aborted) { this.root.style.opacity = '1'; return; }
+        this.root.style.opacity = '1';
+      }
+    }
+  }
+
+  // ─── ApiariTerminal ─────────────────────────────────────────────
+
+  class ApiariTerminal {
+    constructor(container) {
+      this.root = typeof container === 'string' ? document.getElementById(container) : container;
+      if (!this.root) return;
+      this.workers = new Map();
+      this.signals = [];
+      this.reviews = [];
+      this.feed = [];
+      this.chatMessages = [];
+      this.aborted = false;
+      this.loopCount = 0;
+      this._build();
+    }
+
+    _build() {
+      var r = this.root;
+      r.innerHTML = '';
+      r.style.position = 'relative';
+      r.style.fontFamily = "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace";
+      r.style.fontSize = '11px';
+      r.style.lineHeight = '1.35';
+      r.style.background = COLORS.comb;
+      r.style.color = COLORS.frost;
+      r.style.overflow = 'hidden';
+
+      // Title bar with macOS dots
+      var titleBar = el('div');
+      titleBar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid ' + COLORS.slate + ';';
+
+      var dots = el('div');
+      dots.style.cssText = 'display:flex;gap:6px;';
+      var redDot = el('span');
+      redDot.style.cssText = 'width:12px;height:12px;border-radius:50%;background:rgba(255,107,53,0.6);display:inline-block;';
+      var yellowDot = el('span');
+      yellowDot.style.cssText = 'width:12px;height:12px;border-radius:50%;background:rgba(245,166,35,0.6);display:inline-block;';
+      var greenDot = el('span');
+      greenDot.style.cssText = 'width:12px;height:12px;border-radius:50%;background:rgba(126,200,160,0.6);display:inline-block;cursor:pointer;';
+      greenDot.title = 'Expand fullscreen';
+      var self = this;
+      greenDot.addEventListener('click', function (e) { e.stopPropagation(); openFullscreen(self); });
+      dots.appendChild(redDot);
+      dots.appendChild(yellowDot);
+      dots.appendChild(greenDot);
+      titleBar.appendChild(dots);
+      var titleText = el('span', '', 'apiari \u2014 coordinator dashboard');
+      titleText.style.cssText = 'color:' + COLORS.smoke + ';font-size:11px;margin-left:8px;';
+      titleBar.appendChild(titleText);
+      r.appendChild(titleBar);
+
+      // Tab bar
+      var tabBar = el('div');
+      tabBar.style.cssText = 'padding:2px 10px;color:' + COLORS.smoke + ';font-size:10px;border-bottom:1px solid ' + COLORS.slate + ';background:' + COLORS.wax + ';';
+      tabBar.innerHTML = ' * apiari --- <span style="color:' + COLORS.honey + '">[ apiari ]</span>   n/p q:quit';
+      r.appendChild(tabBar);
+
+      // KPI strip
+      this.kpiStrip = el('div');
+      this.kpiStrip.style.cssText = 'padding:6px 10px;border-bottom:1px solid ' + COLORS.slate + ';display:flex;gap:12px;flex-wrap:wrap;';
+      this._renderKpi({ github: 'ok', swarm: 'ok', sentry: 'ok' });
+      r.appendChild(this.kpiStrip);
+
+      // Main area
+      var mainArea = el('div');
+      mainArea.style.cssText = 'display:flex;min-height:180px;height:calc(100% - 145px);';
+
+      // Left: Workers panel (40%)
+      var workersPanel = el('div');
+      workersPanel.style.cssText = 'width:40%;border-right:1px solid ' + COLORS.slate + ';display:flex;flex-direction:column;overflow:hidden;';
+      var wpTitle = el('div');
+      wpTitle.style.cssText = 'padding:4px 8px;color:' + COLORS.smoke + ';font-size:10px;border-bottom:1px solid ' + COLORS.slate + ';';
+      this.wpTitleEl = wpTitle;
+      wpTitle.textContent = '\u250C\u2500 Workers (0) \u2500\u2510';
+      workersPanel.appendChild(wpTitle);
+      this.aWorkerList = el('div');
+      this.aWorkerList.style.cssText = 'flex:1;overflow-y:auto;padding:2px 0;';
+      workersPanel.appendChild(this.aWorkerList);
+      mainArea.appendChild(workersPanel);
+
+      // Right: stacked panels (60%)
+      var rightStack = el('div');
+      rightStack.style.cssText = 'width:60%;display:flex;flex-direction:column;overflow:hidden;';
+
+      // Reviews panel (35%)
+      var reviewsPanel = el('div');
+      reviewsPanel.style.cssText = 'height:35%;border-bottom:1px solid ' + COLORS.slate + ';display:flex;flex-direction:column;overflow:hidden;';
+      var rpTitle = el('div');
+      rpTitle.style.cssText = 'padding:4px 8px;color:' + COLORS.smoke + ';font-size:10px;border-bottom:1px solid ' + COLORS.slate + ';';
+      rpTitle.textContent = '\u250C\u2500 Reviews \u2500\u2510';
+      reviewsPanel.appendChild(rpTitle);
+      this.reviewsList = el('div');
+      this.reviewsList.style.cssText = 'flex:1;overflow-y:auto;padding:2px 8px;';
+      reviewsPanel.appendChild(this.reviewsList);
+      rightStack.appendChild(reviewsPanel);
+
+      // Signals panel (30%)
+      var signalsPanel = el('div');
+      signalsPanel.style.cssText = 'height:30%;border-bottom:1px solid ' + COLORS.slate + ';display:flex;flex-direction:column;overflow:hidden;';
+      this.signalsPanelEl = signalsPanel;
+      var spTitle = el('div');
+      spTitle.style.cssText = 'padding:4px 8px;color:' + COLORS.smoke + ';font-size:10px;border-bottom:1px solid ' + COLORS.slate + ';';
+      spTitle.textContent = '\u250C\u2500 Signals \u2500\u2510';
+      signalsPanel.appendChild(spTitle);
+      this.signalsList = el('div');
+      this.signalsList.style.cssText = 'flex:1;overflow-y:auto;padding:2px 8px;';
+      signalsPanel.appendChild(this.signalsList);
+      rightStack.appendChild(signalsPanel);
+
+      // Feed panel (35%)
+      var feedPanel = el('div');
+      feedPanel.style.cssText = 'height:35%;display:flex;flex-direction:column;overflow:hidden;';
+      var fpTitle = el('div');
+      fpTitle.style.cssText = 'padding:4px 8px;color:' + COLORS.smoke + ';font-size:10px;border-bottom:1px solid ' + COLORS.slate + ';';
+      fpTitle.textContent = '\u250C\u2500 Feed \u2500\u2510';
+      feedPanel.appendChild(fpTitle);
+      this.feedList = el('div');
+      this.feedList.style.cssText = 'flex:1;overflow-y:auto;padding:2px 8px;';
+      feedPanel.appendChild(this.feedList);
+      rightStack.appendChild(feedPanel);
+
+      mainArea.appendChild(rightStack);
+      r.appendChild(mainArea);
+
+      // Chat panel
+      var chatPanel = el('div');
+      chatPanel.style.cssText = 'border-top:1px solid ' + COLORS.slate + ';display:flex;flex-direction:column;';
+      var chatTitle = el('div');
+      chatTitle.style.cssText = 'padding:4px 8px;color:' + COLORS.smoke + ';font-size:10px;border-bottom:1px solid ' + COLORS.slate + ';display:flex;justify-content:space-between;';
+      chatTitle.innerHTML = '\u250C\u2500 Chat (Bee) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 daemon <span style="color:' + COLORS.mint + '">\u25CF</span> \u2500\u2510';
+      chatPanel.appendChild(chatTitle);
+
+      this.chatArea = el('div');
+      this.chatArea.style.cssText = 'max-height:60px;overflow-y:auto;padding:4px 8px;';
+      this.chatArea.setAttribute('data-chat-area', '1');
+      chatPanel.appendChild(this.chatArea);
+
+      // Input line
+      this.chatInput = el('div');
+      this.chatInput.style.cssText = 'padding:4px 8px;border-top:1px solid ' + COLORS.slate + ';color:' + COLORS.frost + ';font-size:11px;';
+      this.chatInput.innerHTML = '<span style="color:' + COLORS.smoke + '">&gt;</span> <span class="_itext" style="color:' + COLORS.frost + '"></span><span class="cursor-blink" style="color:' + COLORS.honey + '">\u2502</span>';
+      chatPanel.appendChild(this.chatInput);
+
+      r.appendChild(chatPanel);
+
+      // Status bar
+      var statusBar = el('div');
+      statusBar.style.cssText = 'padding:4px 10px;color:' + COLORS.smoke + ';font-size:10px;border-top:1px solid ' + COLORS.slate + ';background:' + COLORS.wax + ';';
+      statusBar.textContent = ' tab:switch  enter:select  c:chat  q:quit';
+      r.appendChild(statusBar);
+    }
+
+    _renderKpi(kpiData) {
+      this.kpiStrip.innerHTML = '';
+      var items = kpiData || {};
+      var keys = Object.keys(items);
+      for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        var val = items[key];
+        var pill = el('span');
+        var dotColor = val === 'ok' ? COLORS.mint : COLORS.nectar;
+        pill.style.cssText = 'color:' + dotColor + ';font-size:11px;';
+        pill.innerHTML = '\u25CF <span style="color:' + COLORS.frost + '">' + key + '</span>';
+        if (typeof val === 'number') {
+          pill.innerHTML += ' <span style="color:' + COLORS.smoke + '">(' + val + ')</span>';
+        }
+        this.kpiStrip.appendChild(pill);
+      }
+    }
+
+    addWorker(id, opts) {
+      opts = opts || {};
+      var status = opts.status || 'running';
+      var s = STATUS[status] || STATUS.running;
+      var row = el('div');
+      row.style.cssText = 'padding:2px 8px;font-size:11px;display:flex;align-items:center;gap:6px;animation:tdSlideIn 0.2s ease;';
+      row.innerHTML = '<span class="_wdot" style="color:' + s.color + '">' + s.icon + '</span>' +
+        '<span class="_wname" style="color:' + COLORS.white + '">' + id + '</span>' +
+        '<span style="color:' + COLORS.smoke + ';margin-left:auto;font-size:10px;">' + (opts.task || '') + '</span>';
+      this.aWorkerList.appendChild(row);
+      this.workers.set(id, { el: row, status: status });
+      this.wpTitleEl.textContent = '\u250C\u2500 Workers (' + this.workers.size + ') \u2500\u2510';
+    }
+
+    setWorkerStatus(id, status) {
+      var w = this.workers.get(id);
+      if (!w) return;
+      var s = STATUS[status] || STATUS.running;
+      w.status = status;
+      var dot = w.el.querySelector('._wdot');
+      if (dot) { dot.textContent = s.icon; dot.style.color = s.color; }
+      var name = w.el.querySelector('._wname');
+      if (name) name.style.color = status === 'done' ? COLORS.smoke : COLORS.white;
+    }
+
+    addSignal(text, opts) {
+      opts = opts || {};
+      var row = el('div');
+      row.style.cssText = 'padding:2px 0;font-size:10px;color:' + (opts.color || COLORS.nectar) + ';animation:tdSlideIn 0.2s ease;';
+      row.textContent = text;
+      this.signalsList.appendChild(row);
+      this.signalsList.scrollTop = this.signalsList.scrollHeight;
+      if (opts.flash) this._flashPanel(this.signalsPanelEl);
+    }
+
+    addReview(text) {
+      var row = el('div');
+      row.style.cssText = 'padding:2px 0;font-size:10px;color:' + COLORS.frost + ';animation:tdSlideIn 0.2s ease;';
+      row.textContent = text;
+      this.reviewsList.appendChild(row);
+      this.reviewsList.scrollTop = this.reviewsList.scrollHeight;
+    }
+
+    addFeed(text) {
+      var row = el('div');
+      row.style.cssText = 'padding:2px 0;font-size:10px;color:' + COLORS.smoke + ';animation:tdSlideIn 0.2s ease;';
+      row.textContent = text;
+      this.feedList.appendChild(row);
+      this.feedList.scrollTop = this.feedList.scrollHeight;
+    }
+
+    async addChat(role, text, speed) {
+      speed = speed || 20;
+      var line = el('div');
+      line.style.cssText = 'padding:1px 0;font-size:11px;animation:tdSlideIn 0.2s ease;';
+      var labelColor = role === 'bee' ? COLORS.mint : COLORS.honey;
+      var label = role === 'bee' ? 'Bee' : 'You';
+      line.innerHTML = '<span style="color:' + labelColor + ';font-weight:600;">' + label + ':</span> <span class="_ct" style="color:' + COLORS.frost + '"></span>';
+      this.chatArea.appendChild(line);
+      this.chatMessages.push({ role: role, text: text });
+
+      var ct = line.querySelector('._ct');
+      if (this.aborted) { ct.textContent = text; return; }
+      for (var i = 0; i < text.length; i++) {
+        if (this.aborted) { ct.textContent = text; return; }
+        ct.textContent = text.slice(0, i + 1);
+        this.chatArea.scrollTop = this.chatArea.scrollHeight;
+        await sleep(speed);
+      }
+    }
+
+    async simulateInput(text, speed) {
+      speed = speed || 40;
+      var itext = this.chatInput.querySelector('._itext');
+      if (!itext) return;
+      for (var i = 0; i <= text.length; i++) {
+        if (this.aborted) { itext.textContent = text; return; }
+        itext.textContent = text.slice(0, i);
+        await sleep(speed);
+      }
+    }
+
+    clearInput() {
+      var itext = this.chatInput.querySelector('._itext');
+      if (itext) itext.textContent = '';
+    }
+
+    sendInput() {
+      var itext = this.chatInput.querySelector('._itext');
+      var text = itext ? itext.textContent : '';
+      if (text) {
+        this.addChat('you', text, 0);
+        this.clearInput();
+      }
+    }
+
+    _flashPanel(panelEl) {
+      panelEl.style.transition = 'box-shadow 0.15s';
+      panelEl.style.boxShadow = '0 0 8px ' + COLORS.nectar + ', inset 0 0 4px rgba(255,107,53,0.2)';
+      setTimeout(function () {
+        panelEl.style.boxShadow = '';
+      }, 600);
+    }
+
+    _clearAll() {
+      this.aWorkerList.innerHTML = '';
+      this.workers.clear();
+      this.signalsList.innerHTML = '';
+      this.reviewsList.innerHTML = '';
+      this.feedList.innerHTML = '';
+      this.chatArea.innerHTML = '';
+      this.chatMessages = [];
+      this.clearInput();
+      this.wpTitleEl.textContent = '\u250C\u2500 Workers (0) \u2500\u2510';
+    }
+
+    async startDemo() {
+      while (true) {
+        this.aborted = false;
+        this._clearAll();
+        await sleep(100);
+        if (this.aborted) return;
+        await apiariTerminalScript(this);
+        if (this.aborted) return;
+        this.loopCount++;
+        this.root.style.transition = 'opacity 0.5s';
+        this.root.style.opacity = '0.4';
+        await sleep(800);
+        if (this.aborted) { this.root.style.opacity = '1'; return; }
+        this.root.style.opacity = '1';
+      }
+    }
+  }
+
+  // ─── New Demo Scripts ───────────────────────────────────────────
+
+  async function swarmTerminalScript(t) {
+    // Add workers
+    t.addWorker('hive-1', { status: 'running', branch: 'swarm/auth-middleware', agent: 'claude', ago: '2m ago', task: 'add JWT auth middleware', color: COLORS.honey });
+    t.addWorker('hive-2', { status: 'waiting', branch: 'swarm/caching-layer', agent: 'claude', ago: '8m ago', task: 'implement caching', color: COLORS.mint });
+    t.addWorker('cli-1', { status: 'done', branch: 'swarm/readme-update', agent: 'claude', ago: '14m ago', task: 'update README', color: COLORS.smoke });
+    t.setPrUrl('hive-2', 'github.com/\u2026/pull/42');
+
+    await sleep(400); if (t.aborted) return;
+
+    // Select hive-1
+    t.setSelectedWorker('hive-1');
+    await sleep(600); if (t.aborted) return;
+
+    // Stream conversation for hive-1
+    t.appendConversation('<span style="color:' + COLORS.mint + '">\u22EF</span> <span style="color:' + COLORS.smoke + '">Read src/routes/mod.rs</span>', 'tool');
+    await sleep(800); if (t.aborted) return;
+
+    // Update to done
+    var conv = t.conversations.get('hive-1');
+    conv[conv.length - 1] = { text: '<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">Read src/routes/mod.rs</span>', type: 'tool' };
+    t._renderConversation('hive-1');
+
+    t.appendConversation('<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">Read src/main.rs</span>', 'tool');
+    await sleep(600); if (t.aborted) return;
+
+    t.appendConversation('<span style="color:' + COLORS.honey + '">\u22EF</span> <span style="color:' + COLORS.smoke + '">Edit src/middleware.rs \u2026</span>', 'tool');
+    await sleep(500); if (t.aborted) return;
+
+    t.appendConversation('Adding JWT validation layer\u2026', 'output');
+    await sleep(800); if (t.aborted) return;
+
+    t.appendConversation('Writing token extraction logic\u2026', 'output');
+    await sleep(1000); if (t.aborted) return;
+
+    // Mark edit done
+    conv = t.conversations.get('hive-1');
+    conv[2] = { text: '<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">Edit src/middleware.rs</span>', type: 'tool' };
+    t._renderConversation('hive-1');
+    await sleep(400); if (t.aborted) return;
+
+    t.appendConversation('<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">Write tests/middleware_test.rs</span>', 'tool');
+    await sleep(600); if (t.aborted) return;
+
+    t.appendConversation('Running: cargo test', 'output');
+    await sleep(1200); if (t.aborted) return;
+
+    t.appendConversation('<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">cargo test \u2014 47 passed</span>', 'tool');
+    await sleep(500); if (t.aborted) return;
+
+    t.appendConversation('<span style="color:' + COLORS.honey + '">\u22EF</span> <span style="color:' + COLORS.smoke + '">git commit -m "feat: add JWT auth middleware"</span>', 'tool');
+    await sleep(800); if (t.aborted) return;
+
+    conv = t.conversations.get('hive-1');
+    conv[conv.length - 1] = { text: '<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">git commit -m "feat: add JWT auth middleware"</span>', type: 'tool' };
+    t._renderConversation('hive-1');
+    await sleep(400); if (t.aborted) return;
+
+    t.appendConversation('<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">gh pr create \u2192 PR #43 opened</span>', 'tool');
+    await sleep(600); if (t.aborted) return;
+
+    t.setWorkerStatus('hive-1', 'waiting');
+    t.setPrUrl('hive-1', 'github.com/\u2026/pull/43');
+
+    await sleep(3000);
+  }
+
+  async function apiariTerminalScript(t) {
+    // Initial state
+    t._renderKpi({ github: 'ok', swarm: 'ok', sentry: 'ok' });
+    t.addWorker('hive-1', { status: 'running', task: 'add caching layer' });
+    t.addWorker('hive-2', { status: 'waiting', task: 'update auth tests' });
+    t.addReview('\u25CB PR #41 \u2014 caching layer (hive-1)');
+    t.addFeed('\u25CF hive-2 opened PR #40 \u2014 auth tests');
+    t.addFeed('\u25CF cli-1 completed \u2014 README update');
+
+    await sleep(800); if (t.aborted) return;
+
+    // Sentry signal arrives
+    t.addSignal('\u26A0 Sentry: NullPointerException in auth (\u00D712)', { flash: true, color: COLORS.nectar });
+    await sleep(300); if (t.aborted) return;
+    t._renderKpi({ github: 'ok', swarm: 'ok', sentry: 12 });
+    t.addFeed('\u25CF Signal: Sentry error NullPointerException');
+
+    await sleep(1200); if (t.aborted) return;
+
+    // Coordinator responds
+    await t.addChat('bee', 'Picked up a Sentry error \u2014 NullPointerException in auth (\u00D712). Want me to dispatch a fix?');
+    if (t.aborted) return;
+
+    await sleep(2000); if (t.aborted) return;
+
+    // User types response
+    await t.simulateInput('yes dispatch it');
+    if (t.aborted) return;
+    await sleep(500); if (t.aborted) return;
+    t.sendInput();
+
+    await sleep(400); if (t.aborted) return;
+
+    // Spawn new worker
+    t.addWorker('hive-3', { status: 'running', task: 'fix NullPointerException' });
+    t.addFeed('\u25CF Spawned hive-3 \u2014 fix NullPointerException');
+
+    await t.addChat('bee', 'Spawned hive-3. I\'ll ping you when the PR is ready.');
+    if (t.aborted) return;
+
+    await sleep(3000); if (t.aborted) return;
+
+    // Worker finishes
+    t.setWorkerStatus('hive-3', 'waiting');
+    t.addReview('\u25CB PR #44 \u2014 fix auth NPE (hive-3)');
+    t.addFeed('\u25CF hive-3 opened PR #44');
+
+    await t.addChat('bee', 'hive-3 opened PR #44 \u2014 fixes the NullPointerException. CI is green. Ready for review.');
+    if (t.aborted) return;
+
+    await sleep(3000);
+  }
+
   // ─── Init ───────────────────────────────────────────────────────
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -1089,20 +1832,11 @@
     }
 
     if (swarmEl) {
-      new TerminalDemo(swarmEl, {
-        title: 'swarm',
-        agentMode: true,
-        demoScript: swarmDemoScript,
-      }).startDemo();
+      new SwarmTerminal(swarmEl).startDemo();
     }
 
     if (apiariEl) {
-      new TerminalDemo(apiariEl, {
-        title: 'apiari ui',
-        showKpi: true,
-        kpi: { workers: 3, signals: 2, prs: 1 },
-        demoScript: apiariDemoScript,
-      }).startDemo();
+      new ApiariTerminal(apiariEl).startDemo();
     }
 
     // ── Architecture diagrams ──
