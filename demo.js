@@ -933,39 +933,55 @@
       bubbleRect.setAttribute('stroke', color);
     }
 
-    // Helper: wait while paused
-    async function pw() {
+    // Wait while paused, return false if stopped
+    async function waitIfPaused() {
       while (state.paused) { await sleep(100); if (!state.running) return false; }
       return state.running;
     }
 
+    // Fire a dot along an L-shaped path (array of [x1,y1,x2,y2,duration] legs)
+    async function fireLPath(legs, color, radius) {
+      for (var i = 0; i < legs.length; i++) {
+        if (!(await waitIfPaused())) return false;
+        var l = legs[i];
+        fireOnceDot(animG, l[0], l[1], l[2], l[3], { color: color, duration: l[4], radius: radius || 5 });
+        await sleep(l[4] + 100);
+        if (!state.running) return false;
+      }
+      return true;
+    }
+
     // Cycle 1: Sentry error → signals → daemon → notify you (nectar)
     async function runSentryCycle() {
-      if (!(await pw())) return;
-      // Dot from Sentry down to routing elbow, then left to signals
+      if (!(await waitIfPaused())) return;
+      // Sentry → signals via L-path
       glowPulse(sentryRect, COLORS.nectar, 600);
-      fireOnceDot(animG, 845, 65, 800, 65, { color: COLORS.nectar, duration: 400, radius: 5 });
-      await sleep(500); if (!state.running) return;
-      fireOnceDot(animG, 800, 65, 800, 285, { color: COLORS.nectar, duration: 700, radius: 5 });
-      await sleep(800); if (!state.running) return;
-      fireOnceDot(animG, 800, 285, 585, 285, { color: COLORS.nectar, duration: 600, radius: 5 });
-      await sleep(700); if (!state.running) return;
+      if (!(await fireLPath([
+        [845, 65, 800, 65, 400],
+        [800, 65, 800, 285, 700],
+        [800, 285, 585, 285, 600],
+      ], COLORS.nectar))) return;
       glowPulse(signalsRect, COLORS.nectar, 600);
+      if (!(await waitIfPaused())) return;
       await sleep(400); if (!state.running) return;
 
       // signals → daemon
+      if (!(await waitIfPaused())) return;
       fireOnceDot(animG, 440, 300, 365, 185, { color: COLORS.nectar, duration: 800, radius: 5 });
       await sleep(900); if (!state.running) return;
 
-      if (!(await pw())) return;
+      // coordinator thinks
+      if (!(await waitIfPaused())) return;
       glowPulse(daemonRect, COLORS.honey, 1000);
       glowPulse(coordText, COLORS.honey, 1000);
       await sleep(1100); if (!state.running) return;
 
       // daemon → You
+      if (!(await waitIfPaused())) return;
       fireOnceDot(animG, 195, 135, 125, 135, { color: COLORS.nectar, duration: 800, radius: 4 });
       await sleep(900); if (!state.running) return;
 
+      if (!(await waitIfPaused())) return;
       setBubble('Sentry error', COLORS.nectar);
       telegramBubble.style.opacity = '1';
       telegramBubble.style.animation = 'bubbleSlide 0.4s ease-out';
@@ -975,36 +991,40 @@
 
     // Cycle 2: GitHub Issue → signals → daemon → dispatch → swarm → workers → GitHub PRs → notify
     async function runIssueCycle() {
-      if (!(await pw())) return;
-      // Dot from GitHub Issues along path to signals
+      if (!(await waitIfPaused())) return;
+      // GitHub Issues → signals via L-path
       glowPulse(ghIssueRect, COLORS.frost, 600);
-      fireOnceDot(animG, 845, 225, 830, 225, { color: COLORS.frost, duration: 300, radius: 5 });
-      await sleep(400); if (!state.running) return;
-      fireOnceDot(animG, 830, 225, 830, 325, { color: COLORS.frost, duration: 500, radius: 5 });
-      await sleep(600); if (!state.running) return;
-      fireOnceDot(animG, 830, 325, 585, 325, { color: COLORS.frost, duration: 600, radius: 5 });
-      await sleep(700); if (!state.running) return;
+      if (!(await fireLPath([
+        [845, 225, 830, 225, 300],
+        [830, 225, 830, 325, 500],
+        [830, 325, 585, 325, 600],
+      ], COLORS.frost))) return;
       glowPulse(signalsRect, COLORS.frost, 600);
+      if (!(await waitIfPaused())) return;
       await sleep(400); if (!state.running) return;
 
       // signals → daemon
+      if (!(await waitIfPaused())) return;
       fireOnceDot(animG, 440, 300, 365, 185, { color: COLORS.frost, duration: 800, radius: 5 });
       await sleep(900); if (!state.running) return;
 
-      if (!(await pw())) return;
+      // coordinator thinks
+      if (!(await waitIfPaused())) return;
       glowPulse(daemonRect, COLORS.honey, 1000);
       glowPulse(coordText, COLORS.honey, 1000);
       await sleep(1100); if (!state.running) return;
 
       // daemon → swarm (dispatch)
-      if (!(await pw())) return;
+      if (!(await waitIfPaused())) return;
       fireOnceDot(animG, 365, 105, 440, 75, { color: COLORS.honey, duration: 800, radius: 5 });
       await sleep(900); if (!state.running) return;
+
+      if (!(await waitIfPaused())) return;
       glowPulse(swarmRect, COLORS.honey, 600);
       await sleep(700); if (!state.running) return;
 
       // swarm → workers (spawn)
-      if (!(await pw())) return;
+      if (!(await waitIfPaused())) return;
       workerData.forEach(function (a, i) {
         setTimeout(function () {
           if (!state.running) return;
@@ -1012,14 +1032,17 @@
         }, i * 250);
       });
       await sleep(1000); if (!state.running) return;
+
       for (var i = 0; i < workerRects.length; i++) {
+        if (!(await waitIfPaused())) return;
         glowPulse(workerRects[i], COLORS.mint, 500);
         await sleep(300); if (!state.running) return;
       }
+      if (!(await waitIfPaused())) return;
       await sleep(500); if (!state.running) return;
 
       // workers → GitHub PRs (push, honey dots)
-      if (!(await pw())) return;
+      if (!(await waitIfPaused())) return;
       workerData.forEach(function (a, i) {
         setTimeout(function () {
           if (!state.running) return;
@@ -1029,31 +1052,35 @@
       await sleep(1600); if (!state.running) return;
 
       // PR check on GitHub PRs
-      if (!(await pw())) return;
+      if (!(await waitIfPaused())) return;
       prCheck.style.opacity = '1';
       prCheck.style.animation = 'checkPop 0.4s ease-out';
       glowPulse(ghPrRect, COLORS.mint, 600);
       await sleep(1000); if (!state.running) return;
 
-      // GitHub PRs fires event → signals → daemon → You
-      if (!(await pw())) return;
-      fireOnceDot(animG, 845, 155, 815, 155, { color: COLORS.honey, duration: 300, radius: 4 });
-      await sleep(400); if (!state.running) return;
-      fireOnceDot(animG, 815, 155, 815, 305, { color: COLORS.honey, duration: 500, radius: 4 });
-      await sleep(600); if (!state.running) return;
-      fireOnceDot(animG, 815, 305, 585, 305, { color: COLORS.honey, duration: 600, radius: 4 });
-      await sleep(700); if (!state.running) return;
+      // GitHub PRs fires event → signals via L-path → daemon → You
+      if (!(await fireLPath([
+        [845, 155, 815, 155, 300],
+        [815, 155, 815, 305, 500],
+        [815, 305, 585, 305, 600],
+      ], COLORS.honey, 4))) return;
       glowPulse(signalsRect, COLORS.honey, 600);
+      if (!(await waitIfPaused())) return;
       await sleep(400); if (!state.running) return;
 
+      if (!(await waitIfPaused())) return;
       fireOnceDot(animG, 440, 300, 365, 185, { color: COLORS.honey, duration: 800, radius: 4 });
       await sleep(900); if (!state.running) return;
+
+      if (!(await waitIfPaused())) return;
       glowPulse(daemonRect, COLORS.honey, 800);
       await sleep(600); if (!state.running) return;
 
+      if (!(await waitIfPaused())) return;
       fireOnceDot(animG, 195, 135, 125, 135, { color: COLORS.honey, duration: 800, radius: 4 });
       await sleep(900); if (!state.running) return;
 
+      if (!(await waitIfPaused())) return;
       setBubble('PR opened!', COLORS.honey);
       telegramBubble.style.opacity = '1';
       telegramBubble.style.animation = 'bubbleSlide 0.4s ease-out';
@@ -1063,27 +1090,33 @@
 
     // Cycle 3: Swarm event → signals → daemon → notify you (mint)
     async function runSwarmCycle() {
-      if (!(await pw())) return;
+      if (!(await waitIfPaused())) return;
       // swarm → signals (vertical)
       glowPulse(swarmRect, COLORS.mint, 600);
       fireOnceDot(animG, 512, 125, 512, 265, { color: COLORS.mint, duration: 800, radius: 5 });
       await sleep(900); if (!state.running) return;
+
+      if (!(await waitIfPaused())) return;
       glowPulse(signalsRect, COLORS.mint, 600);
       await sleep(400); if (!state.running) return;
 
       // signals → daemon
+      if (!(await waitIfPaused())) return;
       fireOnceDot(animG, 440, 300, 365, 185, { color: COLORS.mint, duration: 800, radius: 5 });
       await sleep(900); if (!state.running) return;
 
-      if (!(await pw())) return;
+      // coordinator thinks
+      if (!(await waitIfPaused())) return;
       glowPulse(daemonRect, COLORS.honey, 1000);
       glowPulse(coordText, COLORS.honey, 1000);
       await sleep(1100); if (!state.running) return;
 
       // daemon → You
+      if (!(await waitIfPaused())) return;
       fireOnceDot(animG, 195, 135, 125, 135, { color: COLORS.mint, duration: 800, radius: 4 });
       await sleep(900); if (!state.running) return;
 
+      if (!(await waitIfPaused())) return;
       setBubble('Worker done', COLORS.mint);
       telegramBubble.style.opacity = '1';
       telegramBubble.style.animation = 'bubbleSlide 0.4s ease-out';
