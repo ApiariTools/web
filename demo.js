@@ -830,18 +830,20 @@
     staticG.appendChild(svgText(537, 112, 'agents + worktrees', { fill: COLORS.smoke, size: '10' }));
     staticG.appendChild(svgText(537, 128, 'state.json', { fill: COLORS.smoke, size: '10' }));
 
-    // -- Notify line swarm → daemon --
-    var notifyLine = svgAnimatedLine(465, 140, 380, 160, { animated: true, stroke: COLORS.mint, reverse: true });
-    notifyLine.setAttribute('stroke-dasharray', '4 4');
-    staticG.appendChild(notifyLine);
-    staticG.appendChild(svgText(422, 158, 'notify', { fill: COLORS.mint, size: '9' }));
+    // -- Polls line daemon → swarm (swarm watcher reads state.json) --
+    staticG.appendChild(svgAnimatedLine(380, 165, 465, 145, { animated: true, stroke: COLORS.smoke, sw: '1' }));
+    staticG.appendChild(svgText(422, 158, 'polls state.json', { fill: COLORS.smoke, size: '9' }));
 
     // -- Signals node (always visible) --
-    var signalsRect = svgRect(465, 290, 145, 95, { stroke: COLORS.nectar, sw: '1' });
+    var signalsRect = svgRect(465, 290, 145, 110, { stroke: COLORS.nectar, sw: '1' });
     staticG.appendChild(signalsRect);
     staticG.appendChild(svgText(537, 322, 'signals', { fill: COLORS.nectar, size: '14', weight: '600' }));
     staticG.appendChild(svgText(537, 342, 'Sentry errors', { fill: COLORS.smoke, size: '10' }));
     staticG.appendChild(svgText(537, 358, 'GitHub events', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgText(537, 374, 'swarm events', { fill: COLORS.smoke, size: '10' }));
+
+    // -- Line swarm → signals (swarm events flow) --
+    staticG.appendChild(svgAnimatedLine(537, 165, 537, 290, { animated: true, stroke: COLORS.slate, sw: '1' }));
 
     // -- GitHub node (always visible) --
     var ghRect = svgRect(790, 85, 140, 80, { stroke: COLORS.royal });
@@ -851,7 +853,7 @@
 
     // -- Webhooks path: GitHub → signals --
     var whPath = svgEl('path', {
-      d: 'M 860 165 L 860 340 L 610 340',
+      d: 'M 860 165 L 860 345 L 610 345',
       fill: 'none', stroke: COLORS.slate, 'stroke-width': '1',
     });
     whPath.setAttribute('class', 'arch-arrow-animated');
@@ -909,10 +911,10 @@
     async function runGitHubCycle() {
       // Step 1: GitHub signal → signals box (orange dot via webhook path)
       while (state.paused) { await sleep(100); if (!state.running) return; }
-      fireOnceDot(animG, 860, 165, 860, 340, { color: COLORS.nectar, duration: 600, radius: 5 });
+      fireOnceDot(animG, 860, 165, 860, 345, { color: COLORS.nectar, duration: 600, radius: 5 });
       await sleep(700);
       if (!state.running) return;
-      fireOnceDot(animG, 860, 340, 610, 340, { color: COLORS.nectar, duration: 600, radius: 5 });
+      fireOnceDot(animG, 860, 345, 610, 345, { color: COLORS.nectar, duration: 600, radius: 5 });
       await sleep(700);
       if (!state.running) return;
       glowPulse(signalsRect, COLORS.nectar, 600);
@@ -975,21 +977,18 @@
       await sleep(1000);
       if (!state.running) return;
 
-      // Step 7: PR notification chain — GitHub fires event back through webhooks → signals → daemon → You
+      // Step 7: Swarm state.json updates → swarm emits PrOpened signal → signals → daemon → You
       while (state.paused) { await sleep(100); if (!state.running) return; }
-      // GitHub event travels down webhook path to signals
-      fireOnceDot(animG, 860, 165, 860, 340, { color: COLORS.nectar, duration: 600, radius: 5 });
-      await sleep(700);
-      if (!state.running) return;
-      fireOnceDot(animG, 860, 340, 610, 340, { color: COLORS.nectar, duration: 600, radius: 5 });
-      await sleep(700);
+      // Dot travels swarm → signals (swarm watcher detected PrOpened)
+      fireOnceDot(animG, 537, 165, 537, 290, { color: COLORS.honey, duration: 800, radius: 5 });
+      await sleep(900);
       if (!state.running) return;
       // Signals box glows
-      glowPulse(signalsRect, COLORS.nectar, 600);
+      glowPulse(signalsRect, COLORS.honey, 600);
       await sleep(400);
       if (!state.running) return;
       // Dot travels signals → daemon
-      fireOnceDot(animG, 465, 310, 380, 210, { color: COLORS.nectar, duration: 800, radius: 5 });
+      fireOnceDot(animG, 465, 310, 380, 210, { color: COLORS.honey, duration: 800, radius: 5 });
       await sleep(900);
       if (!state.running) return;
       // Daemon thinks briefly
