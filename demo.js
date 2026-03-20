@@ -785,7 +785,7 @@
 
   function buildApiariDiagram(container) {
     container.innerHTML = '';
-    var svg = svgEl('svg', { viewBox: '0 0 960 420', preserveAspectRatio: 'xMidYMid meet' });
+    var svg = svgEl('svg', { viewBox: '0 0 1060 400', preserveAspectRatio: 'xMidYMid meet' });
     svg.style.width = '100%';
     svg.style.height = 'auto';
     svg.style.minHeight = '280px';
@@ -793,103 +793,129 @@
     var staticG = svgEl('g');
     var animG = svgEl('g');
 
-    // -- You node (always visible) --
-    var youRect = svgRect(15, 130, 110, 80, { stroke: COLORS.honey });
+    // -- You node --
+    var youRect = svgRect(15, 100, 110, 70, { stroke: COLORS.honey });
     staticG.appendChild(youRect);
-    staticG.appendChild(svgText(70, 163, 'You', { fill: COLORS.honey, size: '15', weight: '600' }));
-    staticG.appendChild(svgText(70, 185, 'Telegram / TUI', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgText(70, 130, 'You', { fill: COLORS.honey, size: '15', weight: '600' }));
+    staticG.appendChild(svgText(70, 148, 'Telegram / TUI', { fill: COLORS.smoke, size: '10' }));
 
-    // -- Line You ↔ daemon --
-    staticG.appendChild(svgAnimatedLine(125, 170, 200, 170, { animated: true, stroke: COLORS.slate }));
-    staticG.appendChild(svgText(162, 160, 'chat', { fill: COLORS.smoke, size: '10' }));
+    // -- Line You → daemon --
+    staticG.appendChild(svgAnimatedLine(125, 135, 195, 135, { animated: true, stroke: COLORS.slate }));
+    staticG.appendChild(svgText(160, 125, 'chat', { fill: COLORS.smoke, size: '10' }));
 
-    // -- Apiari daemon node (always visible) --
-    var daemonRect = svgRect(200, 100, 180, 155, { stroke: COLORS.honey });
+    // -- Apiari daemon node --
+    var daemonRect = svgRect(195, 60, 170, 155, { stroke: COLORS.honey });
     staticG.appendChild(daemonRect);
-    staticG.appendChild(svgText(290, 130, 'apiari daemon', { fill: COLORS.honey, size: '14', weight: '600' }));
+    staticG.appendChild(svgText(280, 90, 'apiari daemon', { fill: COLORS.honey, size: '14', weight: '600' }));
 
-    var coordText = svgText(290, 155, 'coordinator', { fill: COLORS.mint, size: '12' });
+    var coordText = svgText(280, 115, 'coordinator', { fill: COLORS.mint, size: '12' });
     staticG.appendChild(coordText);
-    staticG.appendChild(svgText(290, 175, 'signal watchers', { fill: COLORS.smoke, size: '10' }));
-    staticG.appendChild(svgText(290, 192, 'swarm watcher', { fill: COLORS.smoke, size: '10' }));
-    staticG.appendChild(svgText(290, 209, 'auto-triage', { fill: COLORS.smoke, size: '10' }));
-    staticG.appendChild(svgText(290, 226, 'telegram bot', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgText(280, 135, 'signal watchers', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgText(280, 152, 'swarm watcher', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgText(280, 169, 'auto-triage', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgText(280, 186, 'telegram bot', { fill: COLORS.smoke, size: '10' }));
 
     // -- Line daemon → swarm --
-    staticG.appendChild(svgAnimatedLine(380, 150, 465, 110, { animated: true, stroke: COLORS.slate }));
-    staticG.appendChild(svgText(422, 122, 'dispatch', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgAnimatedLine(365, 105, 440, 75, { animated: true, stroke: COLORS.slate }));
+    staticG.appendChild(svgText(402, 82, 'dispatch', { fill: COLORS.smoke, size: '10' }));
 
-    // -- Line daemon ↔ signals --
-    staticG.appendChild(svgAnimatedLine(380, 210, 465, 310, { animated: true, stroke: COLORS.slate, reverse: true }));
-    staticG.appendChild(svgText(410, 268, 'poll', { fill: COLORS.smoke, size: '10' }));
+    // -- Line signals → daemon --
+    staticG.appendChild(svgAnimatedLine(365, 185, 440, 300, { animated: true, stroke: COLORS.slate, reverse: true }));
+    staticG.appendChild(svgText(390, 248, 'read', { fill: COLORS.smoke, size: '10' }));
 
-    // -- Swarm node (always visible) --
-    var swarmRect = svgRect(465, 55, 145, 110, { stroke: COLORS.honey, sw: '1' });
+    // -- Swarm node --
+    var swarmRect = svgRect(440, 30, 145, 95, { stroke: COLORS.honey, sw: '1' });
     staticG.appendChild(swarmRect);
-    staticG.appendChild(svgText(537, 92, 'swarm', { fill: COLORS.honey, size: '14', weight: '600' }));
-    staticG.appendChild(svgText(537, 112, 'agents + worktrees', { fill: COLORS.smoke, size: '10' }));
-    staticG.appendChild(svgText(537, 128, 'state.json', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgText(512, 65, 'swarm', { fill: COLORS.honey, size: '14', weight: '600' }));
+    staticG.appendChild(svgText(512, 85, 'agents + worktrees', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgText(512, 100, 'multiplexer', { fill: COLORS.smoke, size: '10' }));
 
-    // -- Polls line daemon → swarm (swarm watcher reads state.json) --
-    staticG.appendChild(svgAnimatedLine(380, 165, 465, 145, { animated: true, stroke: COLORS.smoke, sw: '1' }));
-    staticG.appendChild(svgText(422, 158, 'polls state.json', { fill: COLORS.smoke, size: '9' }));
-
-    // -- Signals node (always visible) --
-    var signalsRect = svgRect(465, 290, 145, 110, { stroke: COLORS.nectar, sw: '1' });
+    // -- Signals node --
+    var signalsRect = svgRect(440, 265, 145, 80, { stroke: COLORS.nectar, sw: '1' });
     staticG.appendChild(signalsRect);
-    staticG.appendChild(svgText(537, 322, 'signals', { fill: COLORS.nectar, size: '14', weight: '600' }));
-    staticG.appendChild(svgText(537, 342, 'Sentry errors', { fill: COLORS.smoke, size: '10' }));
-    staticG.appendChild(svgText(537, 358, 'GitHub events', { fill: COLORS.smoke, size: '10' }));
-    staticG.appendChild(svgText(537, 374, 'swarm events', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgText(512, 295, 'signals', { fill: COLORS.nectar, size: '14', weight: '600' }));
+    staticG.appendChild(svgText(512, 315, 'aggregator', { fill: COLORS.smoke, size: '10' }));
+    staticG.appendChild(svgText(512, 332, 'queue', { fill: COLORS.smoke, size: '10' }));
 
-    // -- Line swarm → signals (swarm events flow) --
-    staticG.appendChild(svgAnimatedLine(537, 165, 537, 290, { animated: true, stroke: COLORS.slate, sw: '1' }));
+    // -- Line swarm → signals (swarm events) --
+    staticG.appendChild(svgAnimatedLine(512, 125, 512, 265, { animated: true, stroke: COLORS.slate, sw: '1' }));
+    staticG.appendChild(svgText(525, 198, 'events', { fill: COLORS.smoke, size: '9', anchor: 'start' }));
 
-    // -- GitHub node (always visible) --
-    var ghRect = svgRect(790, 85, 140, 80, { stroke: COLORS.royal });
-    staticG.appendChild(ghRect);
-    staticG.appendChild(svgText(860, 118, 'GitHub', { fill: COLORS.royal, size: '15', weight: '600' }));
-    staticG.appendChild(svgText(860, 138, 'PRs + issues', { fill: COLORS.smoke, size: '11' }));
-
-    // -- Webhooks path: GitHub → signals --
-    var whPath = svgEl('path', {
-      d: 'M 860 165 L 860 345 L 610 345',
-      fill: 'none', stroke: COLORS.slate, 'stroke-width': '1',
-    });
-    whPath.setAttribute('class', 'arch-arrow-animated');
-    staticG.appendChild(whPath);
-    staticG.appendChild(svgText(740, 358, 'webhooks', { fill: COLORS.smoke, size: '10' }));
-
-    // -- Worker nodes (always visible) --
+    // -- Worker nodes --
     var workerData = [
-      { id: 'worker-1', y: 30 },
-      { id: 'worker-2', y: 105 },
-      { id: 'worker-3', y: 180 },
+      { id: 'worker-1', y: 15 },
+      { id: 'worker-2', y: 72 },
+      { id: 'worker-3', y: 129 },
     ];
 
     var workerRects = [];
     workerData.forEach(function (a) {
       // Lines swarm → worker
-      staticG.appendChild(svgAnimatedLine(610, 110, 660, a.y + 22, { animated: true, stroke: COLORS.slate, sw: '1' }));
-      // Lines worker → GitHub
-      staticG.appendChild(svgAnimatedLine(760, a.y + 22, 790, 125, { animated: true, stroke: COLORS.slate, sw: '1' }));
+      staticG.appendChild(svgAnimatedLine(585, 77, 640, a.y + 22, { animated: true, stroke: COLORS.slate, sw: '1' }));
+      // Lines worker → GitHub PRs
+      staticG.appendChild(svgAnimatedLine(740, a.y + 22, 845, 142, { animated: true, stroke: COLORS.slate, sw: '1' }));
 
-      var r = svgRect(660, a.y, 100, 44, { rx: '4', stroke: COLORS.mint, sw: '1' });
+      var r = svgRect(640, a.y, 100, 44, { rx: '4', stroke: COLORS.mint, sw: '1' });
       staticG.appendChild(r);
-      staticG.appendChild(svgText(710, a.y + 27, a.id, { fill: COLORS.mint, size: '11' }));
+      staticG.appendChild(svgText(690, a.y + 27, a.id, { fill: COLORS.mint, size: '11' }));
       workerRects.push(r);
     });
+    staticG.appendChild(svgText(620, 195, 'spawn', { fill: COLORS.smoke, size: '9' }));
+    staticG.appendChild(svgText(790, 105, 'push', { fill: COLORS.smoke, size: '9' }));
 
-    // -- PR checkmark on GitHub (hidden, toggled per step) --
-    var prCheck = svgText(860, 158, '\u2714 PR', { fill: COLORS.mint, size: '12', weight: '600' });
+    // -- Sentry node (nectar/orange) --
+    var sentryRect = svgRect(845, 40, 140, 50, { stroke: COLORS.nectar, sw: '1.5' });
+    staticG.appendChild(sentryRect);
+    staticG.appendChild(svgText(915, 70, 'Sentry', { fill: COLORS.nectar, size: '13', weight: '600' }));
+
+    // -- GitHub PRs node (royal/purple) --
+    var ghPrRect = svgRect(845, 115, 140, 55, { stroke: COLORS.royal, sw: '1.5' });
+    staticG.appendChild(ghPrRect);
+    staticG.appendChild(svgText(915, 140, 'GitHub PRs', { fill: COLORS.royal, size: '13', weight: '600' }));
+    staticG.appendChild(svgText(915, 157, 'branches + CI', { fill: COLORS.smoke, size: '10' }));
+
+    // -- GitHub Issues node (frost/blue) --
+    var ghIssueRect = svgRect(845, 200, 140, 50, { stroke: COLORS.frost, sw: '1.5' });
+    staticG.appendChild(ghIssueRect);
+    staticG.appendChild(svgText(915, 230, 'GitHub Issues', { fill: COLORS.frost, size: '13', weight: '600' }));
+
+    // -- Arrows from sources → signals --
+    // Sentry → signals (errors) — route down then left
+    var sentryPath = svgEl('path', {
+      d: 'M 845 65 L 800 65 L 800 285 L 585 285',
+      fill: 'none', stroke: COLORS.slate, 'stroke-width': '1',
+    });
+    sentryPath.setAttribute('class', 'arch-arrow-animated');
+    staticG.appendChild(sentryPath);
+    staticG.appendChild(svgText(812, 175, 'errors', { fill: COLORS.smoke, size: '9', anchor: 'end' }));
+
+    // GitHub PRs → signals (events) — route down then left
+    var ghPrPath = svgEl('path', {
+      d: 'M 845 155 L 815 155 L 815 305 L 585 305',
+      fill: 'none', stroke: COLORS.slate, 'stroke-width': '1',
+    });
+    ghPrPath.setAttribute('class', 'arch-arrow-animated');
+    staticG.appendChild(ghPrPath);
+
+    // GitHub Issues → signals (webhooks) — route down then left
+    var ghIssuePath = svgEl('path', {
+      d: 'M 845 225 L 830 225 L 830 325 L 585 325',
+      fill: 'none', stroke: COLORS.slate, 'stroke-width': '1',
+    });
+    ghIssuePath.setAttribute('class', 'arch-arrow-animated');
+    staticG.appendChild(ghIssuePath);
+    staticG.appendChild(svgText(725, 340, 'webhooks', { fill: COLORS.smoke, size: '9' }));
+
+    // -- PR checkmark on GitHub PRs (hidden, toggled per step) --
+    var prCheck = svgText(915, 157, '\u2714', { fill: COLORS.mint, size: '14', weight: '600' });
     prCheck.style.opacity = '0';
 
     // -- Notification bubble (hidden, toggled per step) --
     var telegramBubble = svgEl('g');
     telegramBubble.style.opacity = '0';
-    var bubbleRect = svgRect(15, 85, 110, 30, { rx: '12', stroke: COLORS.honey, fill: COLORS.wax, sw: '1' });
+    var bubbleRect = svgRect(15, 55, 110, 30, { rx: '12', stroke: COLORS.honey, fill: COLORS.wax, sw: '1' });
     telegramBubble.appendChild(bubbleRect);
-    var bubbleText = svgText(70, 105, 'PR opened!', { fill: COLORS.honey, size: '10', weight: '500' });
+    var bubbleText = svgText(70, 75, 'PR opened!', { fill: COLORS.honey, size: '10', weight: '500' });
     telegramBubble.appendChild(bubbleText);
 
     svg.appendChild(staticG);
@@ -901,151 +927,174 @@
     var state = { running: true, paused: false };
     var cycleCount = 0;
 
-    // Helper: set notification bubble text and color
     function setBubble(text, color) {
       bubbleText.textContent = text;
       bubbleText.setAttribute('fill', color);
       bubbleRect.setAttribute('stroke', color);
     }
 
-    async function runGitHubCycle() {
-      // Step 1: GitHub signal → signals box (orange dot via webhook path)
-      while (state.paused) { await sleep(100); if (!state.running) return; }
-      fireOnceDot(animG, 860, 165, 860, 345, { color: COLORS.nectar, duration: 600, radius: 5 });
-      await sleep(700);
-      if (!state.running) return;
-      fireOnceDot(animG, 860, 345, 610, 345, { color: COLORS.nectar, duration: 600, radius: 5 });
-      await sleep(700);
-      if (!state.running) return;
+    // Helper: wait while paused
+    async function pw() {
+      while (state.paused) { await sleep(100); if (!state.running) return false; }
+      return state.running;
+    }
+
+    // Cycle 1: Sentry error → signals → daemon → notify you (nectar)
+    async function runSentryCycle() {
+      if (!(await pw())) return;
+      // Dot from Sentry down to routing elbow, then left to signals
+      glowPulse(sentryRect, COLORS.nectar, 600);
+      fireOnceDot(animG, 845, 65, 800, 65, { color: COLORS.nectar, duration: 400, radius: 5 });
+      await sleep(500); if (!state.running) return;
+      fireOnceDot(animG, 800, 65, 800, 285, { color: COLORS.nectar, duration: 700, radius: 5 });
+      await sleep(800); if (!state.running) return;
+      fireOnceDot(animG, 800, 285, 585, 285, { color: COLORS.nectar, duration: 600, radius: 5 });
+      await sleep(700); if (!state.running) return;
       glowPulse(signalsRect, COLORS.nectar, 600);
+      await sleep(400); if (!state.running) return;
 
-      // Signal → daemon
-      fireOnceDot(animG, 465, 310, 380, 210, { color: COLORS.nectar, duration: 800, radius: 5 });
-      await sleep(900);
-      if (!state.running) return;
+      // signals → daemon
+      fireOnceDot(animG, 440, 300, 365, 185, { color: COLORS.nectar, duration: 800, radius: 5 });
+      await sleep(900); if (!state.running) return;
 
-      // Step 2: Coordinator "thinking" glow
-      while (state.paused) { await sleep(100); if (!state.running) return; }
-      glowPulse(daemonRect, COLORS.honey, 1200);
-      glowPulse(coordText, COLORS.honey, 1200);
-      await sleep(1300);
-      if (!state.running) return;
+      if (!(await pw())) return;
+      glowPulse(daemonRect, COLORS.honey, 1000);
+      glowPulse(coordText, COLORS.honey, 1000);
+      await sleep(1100); if (!state.running) return;
 
-      // Step 3: Dispatch dots daemon → swarm (honey dot)
-      while (state.paused) { await sleep(100); if (!state.running) return; }
-      fireOnceDot(animG, 380, 150, 465, 110, { color: COLORS.honey, duration: 800, radius: 5 });
-      await sleep(900);
-      if (!state.running) return;
+      // daemon → You
+      fireOnceDot(animG, 195, 135, 125, 135, { color: COLORS.nectar, duration: 800, radius: 4 });
+      await sleep(900); if (!state.running) return;
+
+      setBubble('Sentry error', COLORS.nectar);
+      telegramBubble.style.opacity = '1';
+      telegramBubble.style.animation = 'bubbleSlide 0.4s ease-out';
+      glowPulse(youRect, COLORS.nectar, 600);
+      await sleep(1200); if (!state.running) return;
+    }
+
+    // Cycle 2: GitHub Issue → signals → daemon → dispatch → swarm → workers → GitHub PRs → notify
+    async function runIssueCycle() {
+      if (!(await pw())) return;
+      // Dot from GitHub Issues along path to signals
+      glowPulse(ghIssueRect, COLORS.frost, 600);
+      fireOnceDot(animG, 845, 225, 830, 225, { color: COLORS.frost, duration: 300, radius: 5 });
+      await sleep(400); if (!state.running) return;
+      fireOnceDot(animG, 830, 225, 830, 325, { color: COLORS.frost, duration: 500, radius: 5 });
+      await sleep(600); if (!state.running) return;
+      fireOnceDot(animG, 830, 325, 585, 325, { color: COLORS.frost, duration: 600, radius: 5 });
+      await sleep(700); if (!state.running) return;
+      glowPulse(signalsRect, COLORS.frost, 600);
+      await sleep(400); if (!state.running) return;
+
+      // signals → daemon
+      fireOnceDot(animG, 440, 300, 365, 185, { color: COLORS.frost, duration: 800, radius: 5 });
+      await sleep(900); if (!state.running) return;
+
+      if (!(await pw())) return;
+      glowPulse(daemonRect, COLORS.honey, 1000);
+      glowPulse(coordText, COLORS.honey, 1000);
+      await sleep(1100); if (!state.running) return;
+
+      // daemon → swarm (dispatch)
+      if (!(await pw())) return;
+      fireOnceDot(animG, 365, 105, 440, 75, { color: COLORS.honey, duration: 800, radius: 5 });
+      await sleep(900); if (!state.running) return;
       glowPulse(swarmRect, COLORS.honey, 600);
-      await sleep(700);
-      if (!state.running) return;
+      await sleep(700); if (!state.running) return;
 
-      // Step 4: Worker spawn — dispatch dots swarm → workers, then highlight
-      while (state.paused) { await sleep(100); if (!state.running) return; }
+      // swarm → workers (spawn)
+      if (!(await pw())) return;
       workerData.forEach(function (a, i) {
         setTimeout(function () {
           if (!state.running) return;
-          fireOnceDot(animG, 610, 110, 660, a.y + 22, { color: COLORS.honey, duration: 700, radius: 4 });
+          fireOnceDot(animG, 585, 77, 640, a.y + 22, { color: COLORS.honey, duration: 700, radius: 4 });
         }, i * 250);
       });
-      await sleep(1000);
-      if (!state.running) return;
+      await sleep(1000); if (!state.running) return;
       for (var i = 0; i < workerRects.length; i++) {
         glowPulse(workerRects[i], COLORS.mint, 500);
-        await sleep(300);
-        if (!state.running) return;
+        await sleep(300); if (!state.running) return;
       }
-      await sleep(500);
-      if (!state.running) return;
+      await sleep(500); if (!state.running) return;
 
-      // Step 5: Push dots workers → GitHub (mint dots)
-      while (state.paused) { await sleep(100); if (!state.running) return; }
+      // workers → GitHub PRs (push, honey dots)
+      if (!(await pw())) return;
       workerData.forEach(function (a, i) {
         setTimeout(function () {
           if (!state.running) return;
-          fireOnceDot(animG, 760, a.y + 22, 790, 125, { color: COLORS.mint, duration: 900, radius: 4 });
+          fireOnceDot(animG, 740, a.y + 22, 845, 142, { color: COLORS.honey, duration: 900, radius: 4 });
         }, i * 350);
       });
-      await sleep(1600);
-      if (!state.running) return;
+      await sleep(1600); if (!state.running) return;
 
-      // Step 6: PR checkmark on GitHub
-      while (state.paused) { await sleep(100); if (!state.running) return; }
+      // PR check on GitHub PRs
+      if (!(await pw())) return;
       prCheck.style.opacity = '1';
       prCheck.style.animation = 'checkPop 0.4s ease-out';
-      glowPulse(ghRect, COLORS.mint, 600);
-      await sleep(1000);
-      if (!state.running) return;
+      glowPulse(ghPrRect, COLORS.mint, 600);
+      await sleep(1000); if (!state.running) return;
 
-      // Step 7: Swarm state.json updates → swarm emits PrOpened signal → signals → daemon → You
-      while (state.paused) { await sleep(100); if (!state.running) return; }
-      // Dot travels swarm → signals (swarm watcher detected PrOpened)
-      fireOnceDot(animG, 537, 165, 537, 290, { color: COLORS.honey, duration: 800, radius: 5 });
-      await sleep(900);
-      if (!state.running) return;
-      // Signals box glows
+      // GitHub PRs fires event → signals → daemon → You
+      if (!(await pw())) return;
+      fireOnceDot(animG, 845, 155, 815, 155, { color: COLORS.honey, duration: 300, radius: 4 });
+      await sleep(400); if (!state.running) return;
+      fireOnceDot(animG, 815, 155, 815, 305, { color: COLORS.honey, duration: 500, radius: 4 });
+      await sleep(600); if (!state.running) return;
+      fireOnceDot(animG, 815, 305, 585, 305, { color: COLORS.honey, duration: 600, radius: 4 });
+      await sleep(700); if (!state.running) return;
       glowPulse(signalsRect, COLORS.honey, 600);
-      await sleep(400);
-      if (!state.running) return;
-      // Dot travels signals → daemon
-      fireOnceDot(animG, 465, 310, 380, 210, { color: COLORS.honey, duration: 800, radius: 5 });
-      await sleep(900);
-      if (!state.running) return;
-      // Daemon thinks briefly
+      await sleep(400); if (!state.running) return;
+
+      fireOnceDot(animG, 440, 300, 365, 185, { color: COLORS.honey, duration: 800, radius: 4 });
+      await sleep(900); if (!state.running) return;
       glowPulse(daemonRect, COLORS.honey, 800);
-      glowPulse(coordText, COLORS.honey, 800);
-      await sleep(900);
-      if (!state.running) return;
-      // Dot fires daemon → You
-      fireOnceDot(animG, 200, 170, 125, 170, { color: COLORS.honey, duration: 800, radius: 4 });
-      await sleep(900);
-      if (!state.running) return;
+      await sleep(600); if (!state.running) return;
+
+      fireOnceDot(animG, 195, 135, 125, 135, { color: COLORS.honey, duration: 800, radius: 4 });
+      await sleep(900); if (!state.running) return;
 
       setBubble('PR opened!', COLORS.honey);
       telegramBubble.style.opacity = '1';
       telegramBubble.style.animation = 'bubbleSlide 0.4s ease-out';
       glowPulse(youRect, COLORS.honey, 600);
-      await sleep(1200);
-      if (!state.running) return;
+      await sleep(1200); if (!state.running) return;
     }
 
-    async function runSentryCycle() {
-      // Sentry signal: dot appears directly at signals box (polling, not webhooks)
-      while (state.paused) { await sleep(100); if (!state.running) return; }
-      glowPulse(signalsRect, COLORS.nectar, 800);
-      await sleep(900);
-      if (!state.running) return;
+    // Cycle 3: Swarm event → signals → daemon → notify you (mint)
+    async function runSwarmCycle() {
+      if (!(await pw())) return;
+      // swarm → signals (vertical)
+      glowPulse(swarmRect, COLORS.mint, 600);
+      fireOnceDot(animG, 512, 125, 512, 265, { color: COLORS.mint, duration: 800, radius: 5 });
+      await sleep(900); if (!state.running) return;
+      glowPulse(signalsRect, COLORS.mint, 600);
+      await sleep(400); if (!state.running) return;
 
-      // Dot travels signals → daemon
-      while (state.paused) { await sleep(100); if (!state.running) return; }
-      fireOnceDot(animG, 465, 310, 380, 210, { color: COLORS.nectar, duration: 800, radius: 5 });
-      await sleep(900);
-      if (!state.running) return;
+      // signals → daemon
+      fireOnceDot(animG, 440, 300, 365, 185, { color: COLORS.mint, duration: 800, radius: 5 });
+      await sleep(900); if (!state.running) return;
 
-      // Coordinator thinks
-      while (state.paused) { await sleep(100); if (!state.running) return; }
-      glowPulse(daemonRect, COLORS.honey, 1200);
-      glowPulse(coordText, COLORS.honey, 1200);
-      await sleep(1300);
-      if (!state.running) return;
+      if (!(await pw())) return;
+      glowPulse(daemonRect, COLORS.honey, 1000);
+      glowPulse(coordText, COLORS.honey, 1000);
+      await sleep(1100); if (!state.running) return;
 
-      // Daemon notifies You
-      while (state.paused) { await sleep(100); if (!state.running) return; }
-      fireOnceDot(animG, 200, 170, 125, 170, { color: COLORS.nectar, duration: 800, radius: 4 });
-      await sleep(900);
-      if (!state.running) return;
+      // daemon → You
+      fireOnceDot(animG, 195, 135, 125, 135, { color: COLORS.mint, duration: 800, radius: 4 });
+      await sleep(900); if (!state.running) return;
 
-      setBubble('\uD83D\uDD34 Sentry error', COLORS.nectar);
+      setBubble('Worker done', COLORS.mint);
       telegramBubble.style.opacity = '1';
       telegramBubble.style.animation = 'bubbleSlide 0.4s ease-out';
-      glowPulse(youRect, COLORS.nectar, 600);
-      await sleep(1200);
-      if (!state.running) return;
+      glowPulse(youRect, COLORS.mint, 600);
+      await sleep(1200); if (!state.running) return;
     }
+
+    var cycles = [runSentryCycle, runIssueCycle, runSwarmCycle];
 
     async function runLoop() {
       while (state.running) {
-        // Reset transient visuals
         prCheck.style.opacity = '0';
         telegramBubble.style.opacity = '0';
         animG.innerHTML = '';
@@ -1053,16 +1102,10 @@
         await sleep(800);
         if (!state.running) return;
 
-        if (cycleCount % 2 === 0) {
-          await runGitHubCycle();
-        } else {
-          await runSentryCycle();
-        }
+        await cycles[cycleCount % cycles.length]();
         if (!state.running) return;
 
         cycleCount++;
-
-        // Pause, then repeat
         await sleep(2000);
         if (!state.running) return;
       }
