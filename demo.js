@@ -1075,13 +1075,18 @@
   // ─── Fullscreen Modal ─────────────────────────────────────────
 
   function openFullscreen(terminalInstance) {
+    if (terminalInstance._fullscreenOverlay) return;
+
     var overlay = el('div');
     overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    terminalInstance._fullscreenOverlay = overlay;
 
     var modal = el('div');
     modal.style.cssText = 'position:relative;width:100%;max-width:900px;height:80vh;margin:20px;';
 
     var closeBtn = el('button', '', '\u00D7');
+    closeBtn.type = 'button';
+    closeBtn.setAttribute('aria-label', 'Close fullscreen');
     closeBtn.style.cssText = 'position:absolute;top:-36px;right:0;background:none;border:none;color:' + COLORS.smoke + ';font-size:28px;cursor:pointer;z-index:10;padding:4px 8px;';
     closeBtn.onmouseenter = function () { closeBtn.style.color = COLORS.white; };
     closeBtn.onmouseleave = function () { closeBtn.style.color = COLORS.smoke; };
@@ -1107,6 +1112,7 @@
     chatAreas.forEach(function (ca) { ca.style.maxHeight = '60vh'; });
 
     function close() {
+      terminalInstance._fullscreenOverlay = null;
       terminalInstance.root.style.height = origStyles.height;
       terminalInstance.root.style.minHeight = origStyles.minHeight;
       terminalInstance.root.style.maxHeight = origStyles.maxHeight;
@@ -1141,17 +1147,11 @@
     _build() {
       var r = this.root;
       r.innerHTML = '';
-      r.style.position = 'relative';
-      r.style.fontFamily = "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace";
-      r.style.fontSize = '12px';
-      r.style.lineHeight = '1.4';
-      r.style.background = COLORS.comb;
-      r.style.color = COLORS.frost;
-      r.style.overflow = 'hidden';
+      r.style.cssText = 'position:relative;display:flex;flex-direction:column;height:100%;font-family:"JetBrains Mono","SF Mono","Fira Code",monospace;font-size:12px;line-height:1.4;background:' + COLORS.comb + ';color:' + COLORS.frost + ';overflow:hidden;';
 
       // Title bar with macOS dots
       var titleBar = el('div');
-      titleBar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid ' + COLORS.slate + ';';
+      titleBar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid ' + COLORS.slate + ';flex-shrink:0;';
 
       var dots = el('div');
       dots.style.cssText = 'display:flex;gap:6px;';
@@ -1179,7 +1179,7 @@
 
       // Main layout: sidebar | conversation
       var main = el('div');
-      main.style.cssText = 'display:flex;height:calc(100% - 37px);min-height:260px;';
+      main.style.cssText = 'display:flex;flex:1;min-height:0;';
 
       // Left sidebar
       var sidebar = el('div');
@@ -1307,10 +1307,19 @@
     }
 
     appendConversation(text, type) {
+      if (!this.selectedId) return -1;
+      var conv = this.conversations.get(this.selectedId);
+      if (!conv) return -1;
+      conv.push({ text: text, type: type || 'text' });
+      this._renderConversation(this.selectedId);
+      return conv.length - 1;
+    }
+
+    updateConversationAt(index, text, type) {
       if (!this.selectedId) return;
       var conv = this.conversations.get(this.selectedId);
-      if (!conv) return;
-      conv.push({ text: text, type: type || 'text' });
+      if (!conv || index < 0 || index >= conv.length) return;
+      conv[index] = { text: text, type: type || 'tool' };
       this._renderConversation(this.selectedId);
     }
 
@@ -1347,6 +1356,14 @@
       if (dot) { dot.textContent = s.icon; dot.style.color = s.color; }
       var name = w.el.querySelector('._wname');
       if (name) name.style.color = status === 'done' ? COLORS.smoke : COLORS.white;
+    }
+
+    updateLastConversation(text, type) {
+      if (!this.selectedId) return;
+      var conv = this.conversations.get(this.selectedId);
+      if (!conv || conv.length === 0) return;
+      conv[conv.length - 1] = { text: text, type: type || 'tool' };
+      this._renderConversation(this.selectedId);
     }
 
     setPrUrl(id, url) {
@@ -1397,10 +1414,6 @@
       this.root = typeof container === 'string' ? document.getElementById(container) : container;
       if (!this.root) return;
       this.workers = new Map();
-      this.signals = [];
-      this.reviews = [];
-      this.feed = [];
-      this.chatMessages = [];
       this.aborted = false;
       this.loopCount = 0;
       this._build();
@@ -1409,17 +1422,11 @@
     _build() {
       var r = this.root;
       r.innerHTML = '';
-      r.style.position = 'relative';
-      r.style.fontFamily = "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace";
-      r.style.fontSize = '11px';
-      r.style.lineHeight = '1.35';
-      r.style.background = COLORS.comb;
-      r.style.color = COLORS.frost;
-      r.style.overflow = 'hidden';
+      r.style.cssText = 'position:relative;display:flex;flex-direction:column;height:100%;font-family:"JetBrains Mono","SF Mono","Fira Code",monospace;font-size:11px;line-height:1.35;background:' + COLORS.comb + ';color:' + COLORS.frost + ';overflow:hidden;';
 
       // Title bar with macOS dots
       var titleBar = el('div');
-      titleBar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid ' + COLORS.slate + ';';
+      titleBar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid ' + COLORS.slate + ';flex-shrink:0;';
 
       var dots = el('div');
       dots.style.cssText = 'display:flex;gap:6px;';
@@ -1443,19 +1450,19 @@
 
       // Tab bar
       var tabBar = el('div');
-      tabBar.style.cssText = 'padding:2px 10px;color:' + COLORS.smoke + ';font-size:10px;border-bottom:1px solid ' + COLORS.slate + ';background:' + COLORS.wax + ';';
+      tabBar.style.cssText = 'padding:2px 10px;color:' + COLORS.smoke + ';font-size:10px;border-bottom:1px solid ' + COLORS.slate + ';background:' + COLORS.wax + ';flex-shrink:0;';
       tabBar.innerHTML = ' * apiari --- <span style="color:' + COLORS.honey + '">[ apiari ]</span>   n/p q:quit';
       r.appendChild(tabBar);
 
       // KPI strip
       this.kpiStrip = el('div');
-      this.kpiStrip.style.cssText = 'padding:6px 10px;border-bottom:1px solid ' + COLORS.slate + ';display:flex;gap:12px;flex-wrap:wrap;';
+      this.kpiStrip.style.cssText = 'padding:6px 10px;border-bottom:1px solid ' + COLORS.slate + ';display:flex;gap:12px;flex-wrap:wrap;flex-shrink:0;';
       this._renderKpi({ github: 'ok', swarm: 'ok', sentry: 'ok' });
       r.appendChild(this.kpiStrip);
 
       // Main area
       var mainArea = el('div');
-      mainArea.style.cssText = 'display:flex;min-height:180px;height:calc(100% - 145px);';
+      mainArea.style.cssText = 'display:flex;flex:1;min-height:0;';
 
       // Left: Workers panel (40%)
       var workersPanel = el('div');
@@ -1474,9 +1481,9 @@
       var rightStack = el('div');
       rightStack.style.cssText = 'width:60%;display:flex;flex-direction:column;overflow:hidden;';
 
-      // Reviews panel (35%)
+      // Reviews panel
       var reviewsPanel = el('div');
-      reviewsPanel.style.cssText = 'height:35%;border-bottom:1px solid ' + COLORS.slate + ';display:flex;flex-direction:column;overflow:hidden;';
+      reviewsPanel.style.cssText = 'flex:35;border-bottom:1px solid ' + COLORS.slate + ';display:flex;flex-direction:column;overflow:hidden;min-height:0;';
       var rpTitle = el('div');
       rpTitle.style.cssText = 'padding:4px 8px;color:' + COLORS.smoke + ';font-size:10px;border-bottom:1px solid ' + COLORS.slate + ';';
       rpTitle.textContent = '\u250C\u2500 Reviews \u2500\u2510';
@@ -1486,9 +1493,9 @@
       reviewsPanel.appendChild(this.reviewsList);
       rightStack.appendChild(reviewsPanel);
 
-      // Signals panel (30%)
+      // Signals panel
       var signalsPanel = el('div');
-      signalsPanel.style.cssText = 'height:30%;border-bottom:1px solid ' + COLORS.slate + ';display:flex;flex-direction:column;overflow:hidden;';
+      signalsPanel.style.cssText = 'flex:30;border-bottom:1px solid ' + COLORS.slate + ';display:flex;flex-direction:column;overflow:hidden;min-height:0;';
       this.signalsPanelEl = signalsPanel;
       var spTitle = el('div');
       spTitle.style.cssText = 'padding:4px 8px;color:' + COLORS.smoke + ';font-size:10px;border-bottom:1px solid ' + COLORS.slate + ';';
@@ -1499,9 +1506,9 @@
       signalsPanel.appendChild(this.signalsList);
       rightStack.appendChild(signalsPanel);
 
-      // Feed panel (35%)
+      // Feed panel
       var feedPanel = el('div');
-      feedPanel.style.cssText = 'height:35%;display:flex;flex-direction:column;overflow:hidden;';
+      feedPanel.style.cssText = 'flex:35;display:flex;flex-direction:column;overflow:hidden;min-height:0;';
       var fpTitle = el('div');
       fpTitle.style.cssText = 'padding:4px 8px;color:' + COLORS.smoke + ';font-size:10px;border-bottom:1px solid ' + COLORS.slate + ';';
       fpTitle.textContent = '\u250C\u2500 Feed \u2500\u2510';
@@ -1516,7 +1523,7 @@
 
       // Chat panel
       var chatPanel = el('div');
-      chatPanel.style.cssText = 'border-top:1px solid ' + COLORS.slate + ';display:flex;flex-direction:column;';
+      chatPanel.style.cssText = 'border-top:1px solid ' + COLORS.slate + ';display:flex;flex-direction:column;flex-shrink:0;';
       var chatTitle = el('div');
       chatTitle.style.cssText = 'padding:4px 8px;color:' + COLORS.smoke + ';font-size:10px;border-bottom:1px solid ' + COLORS.slate + ';display:flex;justify-content:space-between;';
       chatTitle.innerHTML = '\u250C\u2500 Chat (Bee) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 daemon <span style="color:' + COLORS.mint + '">\u25CF</span> \u2500\u2510';
@@ -1537,7 +1544,7 @@
 
       // Status bar
       var statusBar = el('div');
-      statusBar.style.cssText = 'padding:4px 10px;color:' + COLORS.smoke + ';font-size:10px;border-top:1px solid ' + COLORS.slate + ';background:' + COLORS.wax + ';';
+      statusBar.style.cssText = 'padding:4px 10px;color:' + COLORS.smoke + ';font-size:10px;border-top:1px solid ' + COLORS.slate + ';background:' + COLORS.wax + ';flex-shrink:0;';
       statusBar.textContent = ' tab:switch  enter:select  c:chat  q:quit';
       r.appendChild(statusBar);
     }
@@ -1619,7 +1626,6 @@
       var label = role === 'bee' ? 'Bee' : 'You';
       line.innerHTML = '<span style="color:' + labelColor + ';font-weight:600;">' + label + ':</span> <span class="_ct" style="color:' + COLORS.frost + '"></span>';
       this.chatArea.appendChild(line);
-      this.chatMessages.push({ role: role, text: text });
 
       var ct = line.querySelector('._ct');
       if (this.aborted) { ct.textContent = text; return; }
@@ -1671,7 +1677,6 @@
       this.reviewsList.innerHTML = '';
       this.feedList.innerHTML = '';
       this.chatArea.innerHTML = '';
-      this.chatMessages = [];
       this.clearInput();
       this.wpTitleEl.textContent = '\u250C\u2500 Workers (0) \u2500\u2510';
     }
@@ -1710,18 +1715,16 @@
     await sleep(600); if (t.aborted) return;
 
     // Stream conversation for hive-1
-    t.appendConversation('<span style="color:' + COLORS.mint + '">\u22EF</span> <span style="color:' + COLORS.smoke + '">Read src/routes/mod.rs</span>', 'tool');
+    var readIdx = t.appendConversation('<span style="color:' + COLORS.mint + '">\u22EF</span> <span style="color:' + COLORS.smoke + '">Read src/routes/mod.rs</span>', 'tool');
     await sleep(800); if (t.aborted) return;
 
     // Update to done
-    var conv = t.conversations.get('hive-1');
-    conv[conv.length - 1] = { text: '<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">Read src/routes/mod.rs</span>', type: 'tool' };
-    t._renderConversation('hive-1');
+    t.updateConversationAt(readIdx, '<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">Read src/routes/mod.rs</span>', 'tool');
 
     t.appendConversation('<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">Read src/main.rs</span>', 'tool');
     await sleep(600); if (t.aborted) return;
 
-    t.appendConversation('<span style="color:' + COLORS.honey + '">\u22EF</span> <span style="color:' + COLORS.smoke + '">Edit src/middleware.rs \u2026</span>', 'tool');
+    var editIdx = t.appendConversation('<span style="color:' + COLORS.honey + '">\u22EF</span> <span style="color:' + COLORS.smoke + '">Edit src/middleware.rs \u2026</span>', 'tool');
     await sleep(500); if (t.aborted) return;
 
     t.appendConversation('Adding JWT validation layer\u2026', 'output');
@@ -1731,9 +1734,7 @@
     await sleep(1000); if (t.aborted) return;
 
     // Mark edit done
-    conv = t.conversations.get('hive-1');
-    conv[2] = { text: '<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">Edit src/middleware.rs</span>', type: 'tool' };
-    t._renderConversation('hive-1');
+    t.updateConversationAt(editIdx, '<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">Edit src/middleware.rs</span>', 'tool');
     await sleep(400); if (t.aborted) return;
 
     t.appendConversation('<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">Write tests/middleware_test.rs</span>', 'tool');
@@ -1745,12 +1746,10 @@
     t.appendConversation('<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">cargo test \u2014 47 passed</span>', 'tool');
     await sleep(500); if (t.aborted) return;
 
-    t.appendConversation('<span style="color:' + COLORS.honey + '">\u22EF</span> <span style="color:' + COLORS.smoke + '">git commit -m "feat: add JWT auth middleware"</span>', 'tool');
+    var commitIdx = t.appendConversation('<span style="color:' + COLORS.honey + '">\u22EF</span> <span style="color:' + COLORS.smoke + '">git commit -m "feat: add JWT auth middleware"</span>', 'tool');
     await sleep(800); if (t.aborted) return;
 
-    conv = t.conversations.get('hive-1');
-    conv[conv.length - 1] = { text: '<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">git commit -m "feat: add JWT auth middleware"</span>', type: 'tool' };
-    t._renderConversation('hive-1');
+    t.updateConversationAt(commitIdx, '<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">git commit -m "feat: add JWT auth middleware"</span>', 'tool');
     await sleep(400); if (t.aborted) return;
 
     t.appendConversation('<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">gh pr create \u2192 PR #43 opened</span>', 'tool');
