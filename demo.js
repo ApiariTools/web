@@ -61,6 +61,8 @@
       r.innerHTML = '';
       r.style.cursor = 'pointer';
       r.style.position = 'relative';
+      r.style.minWidth = '0';
+      r.style.boxSizing = 'border-box';
 
       // Title bar
       r.appendChild(el('div', 'flex items-center gap-2 mb-3 pb-2 border-b border-slate',
@@ -79,6 +81,8 @@
       // Main grid: workers | chat
       const grid = el('div', 'grid gap-3');
       grid.style.gridTemplateColumns = '130px 1fr';
+      grid.style.minWidth = '0';
+      grid.style.overflow = 'hidden';
 
       // Workers panel
       const wp = el('div', 'border border-slate rounded p-2');
@@ -98,7 +102,7 @@
       }
 
       this.chatArea = el('div', 'space-y-2 text-xs');
-      this.chatArea.style.cssText = 'flex:1;overflow-y:auto;max-height:160px;min-height:80px;';
+      this.chatArea.style.cssText = 'flex:1;overflow-y:auto;overflow-x:hidden;max-height:160px;min-height:80px;word-break:break-word;overflow-wrap:anywhere;';
       cp.appendChild(this.chatArea);
 
       // Input line
@@ -1223,7 +1227,7 @@
     _build() {
       var r = this.root;
       r.innerHTML = '';
-      r.style.cssText = 'position:relative;display:flex;flex-direction:column;height:100%;font-family:"JetBrains Mono","SF Mono","Fira Code",monospace;font-size:12px;line-height:1.4;background:' + COLORS.comb + ';color:' + COLORS.frost + ';overflow:hidden;';
+      r.style.cssText = 'position:relative;display:flex;flex-direction:column;height:100%;min-width:0;box-sizing:border-box;font-family:"JetBrains Mono","SF Mono","Fira Code",monospace;font-size:12px;line-height:1.4;background:' + COLORS.comb + ';color:' + COLORS.frost + ';overflow:hidden;';
 
       // Title bar with macOS dots
       var titleBar = el('div');
@@ -1255,11 +1259,11 @@
 
       // Main layout: sidebar | conversation
       var main = el('div');
-      main.style.cssText = 'display:flex;flex:1;min-height:0;';
+      main.style.cssText = 'display:flex;flex:1;min-height:0;min-width:0;overflow:hidden;';
 
       // Left sidebar
       var sidebar = el('div');
-      sidebar.style.cssText = 'width:220px;min-width:220px;border-right:1px solid ' + COLORS.slate + ';display:flex;flex-direction:column;overflow:hidden;';
+      sidebar.style.cssText = 'width:220px;min-width:0;max-width:220px;flex-shrink:0;border-right:1px solid ' + COLORS.slate + ';display:flex;flex-direction:column;overflow:hidden;';
 
       this.sidebarHeader = el('div', '', 'WORKERS (0)');
       this.sidebarHeader.style.cssText = 'padding:8px 10px;color:' + COLORS.honey + ';font-size:11px;font-weight:600;letter-spacing:0.5px;';
@@ -1286,15 +1290,15 @@
 
       // Right panel
       var rightPanel = el('div');
-      rightPanel.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;';
+      rightPanel.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;';
 
       this.convHeader = el('div');
-      this.convHeader.style.cssText = 'padding:8px 12px;border-bottom:1px solid ' + COLORS.slate + ';color:' + COLORS.white + ';font-size:11px;font-weight:600;';
+      this.convHeader.style.cssText = 'padding:8px 12px;border-bottom:1px solid ' + COLORS.slate + ';color:' + COLORS.white + ';font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
       this.convHeader.textContent = 'Select a worker';
       rightPanel.appendChild(this.convHeader);
 
       this.convArea = el('div');
-      this.convArea.style.cssText = 'flex:1;overflow-y:auto;padding:8px 12px;';
+      this.convArea.style.cssText = 'flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 12px;word-break:break-word;overflow-wrap:anywhere;';
       this.convArea.setAttribute('data-chat-area', '1');
       rightPanel.appendChild(this.convArea);
 
@@ -1498,7 +1502,7 @@
     _build() {
       var r = this.root;
       r.innerHTML = '';
-      r.style.cssText = 'position:relative;display:flex;flex-direction:column;height:100%;font-family:"JetBrains Mono","SF Mono","Fira Code",monospace;font-size:11px;line-height:1.35;background:' + COLORS.comb + ';color:' + COLORS.frost + ';overflow:hidden;';
+      r.style.cssText = 'position:relative;display:flex;flex-direction:column;height:100%;min-width:0;box-sizing:border-box;font-family:"JetBrains Mono","SF Mono","Fira Code",monospace;font-size:11px;line-height:1.35;background:' + COLORS.comb + ';color:' + COLORS.frost + ';overflow:hidden;';
 
       // Title bar with macOS dots
       var titleBar = el('div');
@@ -1538,11 +1542,11 @@
 
       // Main area
       var mainArea = el('div');
-      mainArea.style.cssText = 'display:flex;flex:1;min-height:0;';
+      mainArea.style.cssText = 'display:flex;flex:1;min-height:0;min-width:0;overflow:hidden;';
 
       // Left: Workers panel (40%)
       var workersPanel = el('div');
-      workersPanel.style.cssText = 'width:40%;border-right:1px solid ' + COLORS.slate + ';display:flex;flex-direction:column;overflow:hidden;';
+      workersPanel.style.cssText = 'width:40%;min-width:0;border-right:1px solid ' + COLORS.slate + ';display:flex;flex-direction:column;overflow:hidden;';
       var wpTitle = el('div');
       wpTitle.style.cssText = 'padding:4px 8px;color:' + COLORS.smoke + ';font-size:10px;border-bottom:1px solid ' + COLORS.slate + ';';
       this.wpTitleEl = wpTitle;
@@ -1555,7 +1559,7 @@
 
       // Right: stacked panels (60%)
       var rightStack = el('div');
-      rightStack.style.cssText = 'width:60%;display:flex;flex-direction:column;overflow:hidden;';
+      rightStack.style.cssText = 'width:60%;min-width:0;display:flex;flex-direction:column;overflow:hidden;';
 
       // Reviews panel
       var reviewsPanel = el('div');
@@ -1565,7 +1569,7 @@
       rpTitle.textContent = '\u250C\u2500 Reviews \u2500\u2510';
       reviewsPanel.appendChild(rpTitle);
       this.reviewsList = el('div');
-      this.reviewsList.style.cssText = 'flex:1;overflow-y:auto;padding:2px 8px;';
+      this.reviewsList.style.cssText = 'flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 8px;word-break:break-word;overflow-wrap:anywhere;';
       reviewsPanel.appendChild(this.reviewsList);
       rightStack.appendChild(reviewsPanel);
 
@@ -1578,7 +1582,7 @@
       spTitle.textContent = '\u250C\u2500 Signals \u2500\u2510';
       signalsPanel.appendChild(spTitle);
       this.signalsList = el('div');
-      this.signalsList.style.cssText = 'flex:1;overflow-y:auto;padding:2px 8px;';
+      this.signalsList.style.cssText = 'flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 8px;word-break:break-word;overflow-wrap:anywhere;';
       signalsPanel.appendChild(this.signalsList);
       rightStack.appendChild(signalsPanel);
 
@@ -1590,7 +1594,7 @@
       fpTitle.textContent = '\u250C\u2500 Feed \u2500\u2510';
       feedPanel.appendChild(fpTitle);
       this.feedList = el('div');
-      this.feedList.style.cssText = 'flex:1;overflow-y:auto;padding:2px 8px;';
+      this.feedList.style.cssText = 'flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 8px;word-break:break-word;overflow-wrap:anywhere;';
       feedPanel.appendChild(this.feedList);
       rightStack.appendChild(feedPanel);
 
@@ -1606,7 +1610,7 @@
       chatPanel.appendChild(chatTitle);
 
       this.chatArea = el('div');
-      this.chatArea.style.cssText = 'max-height:60px;overflow-y:auto;padding:4px 8px;';
+      this.chatArea.style.cssText = 'max-height:60px;overflow-y:auto;overflow-x:hidden;padding:4px 8px;word-break:break-word;overflow-wrap:anywhere;';
       this.chatArea.setAttribute('data-chat-area', '1');
       chatPanel.appendChild(this.chatArea);
 
