@@ -280,7 +280,7 @@
           <span class="text-honey">coordinated.</span>
         </h1>
         <p class="mt-6 text-lg text-smoke leading-relaxed max-w-lg">
-          Install apiari. Run it. Bee introduces herself, sets up your workspace, and starts coordinating your AI agents. No config files required.
+          Tell Bee what to build. She dispatches AI coding agents, monitors CI, forwards code reviews, and pings you on Telegram when your PR is ready to merge.
         </p>
         <div class="mt-8 tui-box p-4 max-w-sm">
           <div class="text-[13px] space-y-1">
@@ -301,6 +301,13 @@
 
       <!-- TUI mockup (JS-controlled) -->
       <div id="hero-terminal" class="tui-box p-4 text-[13px] overflow-hidden" style="box-sizing:border-box;min-width:0"></div>
+    </div>
+  </section>
+
+  <!-- Who this is for -->
+  <section class="py-8">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <p class="text-sm text-smoke font-mono">Built for developers who already use Claude Code and want to run more than one agent at a time.</p>
     </div>
   </section>
 
@@ -421,6 +428,34 @@
           <h3 class="text-white font-semibold mb-2">Bee notifies you when done</h3>
           <p class="text-smoke text-sm leading-relaxed">See everything in the TUI, or get a Telegram ping. Review and merge.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why apiari -->
+  <section class="py-24 border-t border-slate">
+    <div class="max-w-6xl mx-auto px-6">
+      <h2 class="text-3xl font-bold text-white mb-8">Claude Code does the coding. Apiari does the ops.</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="p-6 bg-comb rounded-xl card-glow">
+          <p class="text-frost text-sm leading-relaxed">Run multiple AI coding agents in parallel — each in its own git branch.</p>
+        </div>
+        <div class="p-6 bg-comb rounded-xl card-glow">
+          <p class="text-frost text-sm leading-relaxed">Monitors CI, auto-forwards failures and code review comments to the right agent.</p>
+        </div>
+        <div class="p-6 bg-comb rounded-xl card-glow">
+          <p class="text-frost text-sm leading-relaxed">Notifies you on Telegram when a PR is ready — step away and let it run.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- A day with apiari -->
+  <section class="py-24 border-t border-slate">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="p-8 bg-comb rounded-xl border-l-4 border-amber card-glow">
+        <h3 class="text-lg font-bold text-white mb-4 font-mono">A day with apiari</h3>
+        <p class="text-frost leading-relaxed">Josh asked Bee to add dark mode. She dispatched a worker, monitored CI, forwarded the Copilot review, and pinged Telegram when the PR was ready. <span class="text-honey font-semibold">22 minutes.</span> Josh was in a meeting.</p>
       </div>
     </div>
   </section>
