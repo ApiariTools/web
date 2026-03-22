@@ -454,7 +454,7 @@
     await t.addMessage('bee', 'Reviewing now\u2026');
     if (t.aborted) return;
 
-    await t.addToolCall('done', 'gh pr view 42', 500);
+    await t.addToolCall('done', 'Fetch PR #42 from GitHub', 500);
     if (t.aborted) return;
     await t.addToolCall('done', 'Read src/middleware.rs', 800);
     if (t.aborted) return;
@@ -491,7 +491,7 @@
 
     await t.addToolCall('done', 'git commit -m "feat: add JWT auth middleware"', 600);
     if (t.aborted) return;
-    await t.addToolCall('done', 'gh pr create \u2192 PR #43 opened', 500);
+    await t.addToolCall('done', 'Open PR #43 on GitHub', 500);
     if (t.aborted) return;
 
     t.updateWorker('hive-1', 'waiting', 'github.com/\u2026/pull/43');
@@ -1832,7 +1832,7 @@
     t.updateConversationAt(commitIdx, '<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">git commit -m "feat: add JWT auth middleware"</span>', 'tool');
     await sleep(400); if (t.aborted) return;
 
-    t.appendConversation('<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">gh pr create \u2192 PR #43 opened</span>', 'tool');
+    t.appendConversation('<span style="color:' + COLORS.mint + '">\u2714</span> <span style="color:' + COLORS.smoke + '">Open PR #43 on GitHub</span>', 'tool');
     await sleep(600); if (t.aborted) return;
 
     t.setWorkerStatus('hive-1', 'waiting');
