@@ -277,7 +277,7 @@
       <div>
         <div class="inline-flex items-center gap-2 px-3 py-1 bg-wax rounded-full text-xs text-honey mb-6">
           <span class="w-1.5 h-1.5 bg-honey rounded-full pulse"></span>
-          Works with Claude Code, Codex
+          Works with Claude Code, Codex, Gemini
         </div>
         <h1 class="text-5xl lg:text-6xl font-bold text-white leading-tight glow">
           Your AI agents,<br>
@@ -340,6 +340,15 @@
           </div>
           <span class="text-white text-xs font-medium">Codex</span>
           <span class="text-[10px] text-smoke font-mono">optional</span>
+        </div>
+        <div class="integration-item">
+          <div class="integration-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" stroke="#F5A623" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="text-white text-xs font-medium">Gemini</span>
+          <span class="text-[10px] text-smoke font-mono">supported</span>
         </div>
         <div class="integration-item">
           <div class="integration-icon">
@@ -491,7 +500,7 @@
   <section id="get-started" class="py-24 border-t border-slate">
     <div class="max-w-6xl mx-auto px-6">
       <h2 class="text-3xl font-bold text-white mb-4">Get started</h2>
-      <p class="text-smoke text-lg max-w-xl mb-12">Two commands. Bee will guide you through the rest. Works out of the box with Claude Code, Codex, or any compatible agent.</p>
+      <p class="text-smoke text-lg max-w-xl mb-12">Two commands. Bee will guide you through the rest. Works out of the box with Claude Code, Codex, Gemini, or any compatible agent.</p>
 
       <div class="grid md:grid-cols-2 gap-8">
         <!-- Main install -->
@@ -558,7 +567,7 @@
       <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="p-4 bg-comb rounded-lg">
           <div class="text-honey font-mono font-bold text-sm mb-1">AI agent CLI</div>
-          <p class="text-smoke text-xs">Required. Claude Code, Codex, or compatible agent.</p>
+          <p class="text-smoke text-xs">Required. Claude Code, Codex, Gemini, or compatible agent.</p>
         </div>
         <div class="p-4 bg-comb rounded-lg">
           <div class="text-honey font-mono font-bold text-sm mb-1">GitHub</div>
@@ -570,6 +579,10 @@
         </div>
         <div class="p-4 bg-comb rounded-lg">
           <div class="text-honey font-mono font-bold text-sm mb-1">codex CLI</div>
+          <p class="text-smoke text-xs">Optional. Alternative agent backend.</p>
+        </div>
+        <div class="p-4 bg-comb rounded-lg">
+          <div class="text-honey font-mono font-bold text-sm mb-1">gemini CLI</div>
           <p class="text-smoke text-xs">Optional. Alternative agent backend.</p>
         </div>
       </div>
