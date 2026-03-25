@@ -102,7 +102,7 @@
       }
 
       this.chatArea = el('div', 'space-y-2 text-xs');
-      this.chatArea.style.cssText = 'flex:1;overflow-y:auto;overflow-x:hidden;max-height:160px;min-height:80px;word-break:break-word;overflow-wrap:anywhere;';
+      this.chatArea.style.cssText = 'flex:1;overflow-y:hidden;overflow-x:hidden;max-height:160px;min-height:80px;word-break:break-word;overflow-wrap:anywhere;';
       cp.appendChild(this.chatArea);
 
       // Input line
@@ -1274,7 +1274,7 @@
       sidebar.appendChild(divider);
 
       this.workerList = el('div');
-      this.workerList.style.cssText = 'flex:1;overflow-y:auto;padding:4px 0;';
+      this.workerList.style.cssText = 'flex:1;overflow-y:hidden;padding:4px 0;';
       sidebar.appendChild(this.workerList);
 
       var bottomDiv = el('div');
@@ -1298,7 +1298,7 @@
       rightPanel.appendChild(this.convHeader);
 
       this.convArea = el('div');
-      this.convArea.style.cssText = 'flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 12px;word-break:break-word;overflow-wrap:anywhere;';
+      this.convArea.style.cssText = 'flex:1;overflow-y:hidden;overflow-x:hidden;padding:8px 12px;word-break:break-word;overflow-wrap:anywhere;';
       this.convArea.setAttribute('data-chat-area', '1');
       rightPanel.appendChild(this.convArea);
 
@@ -1553,7 +1553,7 @@
       wpTitle.textContent = '\u250C\u2500 Workers (0) \u2500\u2510';
       workersPanel.appendChild(wpTitle);
       this.aWorkerList = el('div');
-      this.aWorkerList.style.cssText = 'flex:1;overflow-y:auto;padding:2px 0;';
+      this.aWorkerList.style.cssText = 'flex:1;overflow-y:hidden;padding:2px 0;';
       workersPanel.appendChild(this.aWorkerList);
       mainArea.appendChild(workersPanel);
 
@@ -1569,7 +1569,7 @@
       rpTitle.textContent = '\u250C\u2500 Reviews \u2500\u2510';
       reviewsPanel.appendChild(rpTitle);
       this.reviewsList = el('div');
-      this.reviewsList.style.cssText = 'flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 8px;word-break:break-word;overflow-wrap:anywhere;';
+      this.reviewsList.style.cssText = 'flex:1;overflow-y:hidden;overflow-x:hidden;padding:2px 8px;word-break:break-word;overflow-wrap:anywhere;';
       reviewsPanel.appendChild(this.reviewsList);
       rightStack.appendChild(reviewsPanel);
 
@@ -1582,7 +1582,7 @@
       spTitle.textContent = '\u250C\u2500 Signals \u2500\u2510';
       signalsPanel.appendChild(spTitle);
       this.signalsList = el('div');
-      this.signalsList.style.cssText = 'flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 8px;word-break:break-word;overflow-wrap:anywhere;';
+      this.signalsList.style.cssText = 'flex:1;overflow-y:hidden;overflow-x:hidden;padding:2px 8px;word-break:break-word;overflow-wrap:anywhere;';
       signalsPanel.appendChild(this.signalsList);
       rightStack.appendChild(signalsPanel);
 
@@ -1594,7 +1594,7 @@
       fpTitle.textContent = '\u250C\u2500 Feed \u2500\u2510';
       feedPanel.appendChild(fpTitle);
       this.feedList = el('div');
-      this.feedList.style.cssText = 'flex:1;overflow-y:auto;overflow-x:hidden;padding:2px 8px;word-break:break-word;overflow-wrap:anywhere;';
+      this.feedList.style.cssText = 'flex:1;overflow-y:hidden;overflow-x:hidden;padding:2px 8px;word-break:break-word;overflow-wrap:anywhere;';
       feedPanel.appendChild(this.feedList);
       rightStack.appendChild(feedPanel);
 
@@ -1610,7 +1610,7 @@
       chatPanel.appendChild(chatTitle);
 
       this.chatArea = el('div');
-      this.chatArea.style.cssText = 'max-height:60px;overflow-y:auto;overflow-x:hidden;padding:4px 8px;word-break:break-word;overflow-wrap:anywhere;';
+      this.chatArea.style.cssText = 'max-height:60px;overflow-y:hidden;overflow-x:hidden;padding:4px 8px;word-break:break-word;overflow-wrap:anywhere;';
       this.chatArea.setAttribute('data-chat-area', '1');
       chatPanel.appendChild(this.chatArea);
 
