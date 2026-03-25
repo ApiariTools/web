@@ -452,15 +452,67 @@
   <section class="py-24 border-t border-slate">
     <div class="max-w-6xl mx-auto px-6">
       <h2 class="text-3xl font-bold text-white mb-8">Your AI agents do the coding. Apiari does the ops.</h2>
-      <div class="grid md:grid-cols-3 gap-6">
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="p-6 bg-comb rounded-xl card-glow">
           <p class="text-frost text-sm leading-relaxed">Run multiple AI coding agents in parallel — each in its own isolated git worktree.</p>
         </div>
         <div class="p-6 bg-comb rounded-xl card-glow">
-          <p class="text-frost text-sm leading-relaxed">Monitor CI, auto-forward failures and code review comments to the right agent.</p>
+          <p class="text-frost text-sm leading-relaxed">Signal hooks react to CI failures, reviews, and pushes — following playbooks automatically.</p>
+        </div>
+        <div class="p-6 bg-comb rounded-xl card-glow">
+          <p class="text-frost text-sm leading-relaxed">Choose Claude Code, Codex, or Gemini as your coordinator backend. Mix and match per workspace.</p>
         </div>
         <div class="p-6 bg-comb rounded-xl card-glow">
           <p class="text-frost text-sm leading-relaxed">Get notified on Telegram when a PR is ready — step away and let it run.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Configure your workspace -->
+  <section class="py-24 border-t border-slate">
+    <div class="max-w-6xl mx-auto px-6">
+      <h2 class="text-3xl font-bold text-white mb-4">Configure your workspace</h2>
+      <p class="text-smoke text-lg max-w-2xl mb-12">Configure <span class="font-mono text-honey">.apiari/</span> and Bee knows how to act, what to know, and what to do when things happen.</p>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="p-6 bg-comb rounded-xl card-glow">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-honey font-mono font-bold text-sm">soul.md</span>
+          </div>
+          <p class="text-smoke text-sm leading-relaxed">Customize how the coordinator communicates. Set personality, tone, and communication style per workspace.</p>
+        </div>
+        <div class="p-6 bg-comb rounded-xl card-glow">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-honey font-mono font-bold text-sm">context.md</span>
+          </div>
+          <p class="text-smoke text-sm leading-relaxed">Load project knowledge into every session — tech stack, conventions, repo structure. Bee reads it before every task.</p>
+        </div>
+        <div class="p-6 bg-comb rounded-xl card-glow">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-honey font-mono font-bold text-sm">skills/*.md</span>
+            <span class="px-2 py-0.5 bg-wax rounded text-[10px] text-smoke">playbooks</span>
+          </div>
+          <p class="text-smoke text-sm leading-relaxed">Reusable runbooks loaded by signal hooks. Define how to handle CI failures, Copilot reviews, merge readiness, and more.</p>
+        </div>
+        <div class="p-6 bg-comb rounded-xl card-glow">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-honey font-mono font-bold text-sm">Signal hooks</span>
+          </div>
+          <p class="text-smoke text-sm leading-relaxed">Event-driven automation. When CI fails, a review comes in, or a PR is pushed, the coordinator follows a playbook automatically.</p>
+        </div>
+        <div class="p-6 bg-comb rounded-xl card-glow">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-honey font-mono font-bold text-sm">Authority model</span>
+          </div>
+          <p class="text-smoke text-sm leading-relaxed"><span class="font-mono text-frost">autonomous</span> gives full toolset access. <span class="font-mono text-frost">observe</span> is read-only. Fine-grained capabilities like <span class="font-mono text-frost">merge_prs</span> and <span class="font-mono text-frost">dispatch_workers</span>.</p>
+        </div>
+        <div class="p-6 bg-comb rounded-xl card-glow">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-honey font-mono font-bold text-sm">apiari ui</span>
+            <span class="px-2 py-0.5 bg-wax rounded text-[10px] text-smoke">TUI</span>
+          </div>
+          <p class="text-smoke text-sm leading-relaxed">Ratatui terminal dashboard with workers panel and coordinator chat. Connected to the daemon via Unix socket.</p>
         </div>
       </div>
     </div>
